@@ -14,7 +14,7 @@ class Course(models.Model):
         default=4,
         validators=[MaxValueValidator(16), MinValueValidator(1)]
     )
-    terms = ArrayField(models.PositiveSmallIntegerField(), size=4)
+    qtrs = ArrayField(models.PositiveSmallIntegerField(), size=4)
     required = models.BooleanField(default=False)
 
     def __str__(self):
