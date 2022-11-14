@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.contrib.postgres.fields import ArrayField
 
 class User(AbstractUser):
     pass
@@ -13,7 +14,11 @@ class Course(models.Model):
         default=4,
         validators=[MaxValueValidator(16), MinValueValidator(1)]
     )
-    required = models.BooleanField()
+    terms = ArrayField(models.PositiveSmallIntegerField(), size=4)
+    required = models.BooleanField(default=False)
+
+    def __str__(self):
+        return "CS " + str(self.course_number) + " - " + str(self.title)
 
 class Schedule(models.Model):
     class Quarter(models.IntegerChoices):
@@ -23,13 +28,16 @@ class Schedule(models.Model):
         FALL = 3
 
     user = models.ForeignKey('User', on_delete=models.CASCADE)
-    name = models.CharField(max_length=100, default=f"{user.name}'s Schedule{str(id)}") # not enforcing uniqueness on this for now
+    name = models.CharField(max_length=100, default=f"{user.name}'s Schedule") # not enforcing uniqueness on this for now
     start_qtr = models.PositiveSmallIntegerField(choices=Quarter.choices)
     end_qtr = models.PositiveSmallIntegerField(choices=Quarter.choices)
     start_year = models.PositiveSmallIntegerField() 
     end_year = models.PositiveSmallIntegerField()
 
     # TODO: add check constraint for start < end
+
+    def __str__(self):
+        return self.name
 
 class Course_Schedule(models.Model):
     schedule = models.ForeignKey('Schedule', on_delete=models.CASCADE)
@@ -42,6 +50,12 @@ class Course_Schedule(models.Model):
         # TODO: add check constraint for year/qtr within schedule bounds
     ]
 
+    def __str__(self):
+        return str(self.schedule) + " - " + str(self.course.course_number) + " (" + str(self.qtr) + " " + str(self.year) + ")"
+
 class Prereq(models.Model):
     course = models.ForeignKey('Course', related_name='course', on_delete=models.CASCADE)
     prereq = models.ForeignKey('Course', related_name='prereq', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return "CS " + str(self.course.course_number) + " :: CS " + str(self.prereq.course_number)
