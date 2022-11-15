@@ -1,0 +1,22 @@
+<h1>{{ schedule.name }}</h1>
+<h2>Scheduled Courses</h2> 
+<ul>
+{% for course in sched_courses %}
+<li>{{ course.course }} {{ course.year }} {{ course.qtr }} </li>
+{% endfor %}
+</ul>
+
+<h2>Unscheduled Requirements</h2>
+<ul>
+{% for course in unsched_req %}
+<li> {{ course }} </li>
+{% endfor %}
+</ul>
+
+
+<h2>Unscheduled Electives</h2>
+<ul>
+{% for course in unsched_elec%}
+<li> {{ course }} </li>
+{% endfor %}
+</ul>
