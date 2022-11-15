@@ -1,0 +1,9 @@
+.grid-wrapper {
+    display: grid;
+    grid-template-columns: 2fr;
+    grid-template-rows: 1fr;
+}
+
+.qtr {
+    color: #05ff77;
+}
