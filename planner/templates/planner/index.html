@@ -12,39 +12,45 @@
     </header>
     <section id="content" class="grid-wrapper">
         <div id="unscheduled">
-            <h2>Unscheduled Requirements</h2>
-            <ul>
+            <h2>Outstanding Requirements</h2>
+            <div class="course-container">
                 {% for course in unsched_req %}
-                <li class="course-item"> {{ course }} </li>
+                <div class="course-item">
+                    <span class="course-title">{{ course }}</span> 
+                </div>
                 {% endfor %}
-            </ul>
-
-
-            <h2>Unscheduled Electives</h2>
-            <ul>
+            </div>
+            <h2>Available Electives</h2>
+            <div class="course-container">
                 {% for course in unsched_elec%}
-                <li class="course-item"> {{ course }} </li>
-                {% endfor %}
-            </ul>
-        </div>
-        <div id="schedule">
-            <div id="schedule-wrapper" class="grid-wrapper container">
-                {% for term, courses in sched_info.items %}
-                <div class="qtr grid _{{ term.0 }} _{{ term.1}}" id="_{{term.0}}_{{term.1}}">
-                    <h4>{% if term.1 == 0 %}Winter
-                        {%elif term.1 == 1%}Spring
-                        {%elif term.1 == 2%}Summer
-                        {%elif term.1 == 3%}Fall
-                        {%endif%}{{ term.0 }}</h4>
-                    <ul>
-                        {% for course in courses %}
-                        <li class="course-item"> {{course.course}}</li>
-                        {% endfor %}
-                    </ul>
+                <div class="course-item">
+                    <span class="course-title">{{ course }}</span> 
                 </div>
                 {% endfor %}
             </div>
         </div>
+
+        <div id="schedule">
+            <div id="schedule-wrapper" class="term-container grid-wrapper container">
+                {% for term, courses in sched_info.items %}
+                <div class="qtr grid _{{ term.0 }} _{{ term.1}}" id="_{{term.0}}_{{term.1}}">
+                    <h4>{% if term.1 == 0 %}Winter
+                        {% elif term.1 == 1 %}Spring
+                        {% elif term.1 == 2 %}Summer
+                        {% elif term.1 == 3 %}Fall
+                        {% endif %}{{term.0}}</h4>
+                    <div class="course-container">
+                        {% for course in courses %}
+                        <div class="course-item">
+                            <span class="course-title">{{ course.course }}</span> 
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
     </section>
     <footer>
     </footer>

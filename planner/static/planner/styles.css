@@ -13,6 +13,8 @@ header h1,p {
 
 #content {
     grid-template-columns: 1fr 1fr;
+    margin: 0em 3em;
+    column-gap: 4em;
 }
 
 #unscheduled {
@@ -40,7 +42,12 @@ header h1,p {
 }
 
 .course-item {
+    margin: .1em 0;
     padding: .5em;
     background-color: beige;
-    border: 1px blue solid;
+    border: 2px blue solid;
+}
+
+.course-title {
+    padding-left: 5%;
 }
