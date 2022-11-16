@@ -42,7 +42,6 @@ def index(request):
         if qtr == 0:
             year += 1
 
-    print(sched_info)
     context = {
         # To be iterated on/pared down as we go
         "schedule": schedule,
