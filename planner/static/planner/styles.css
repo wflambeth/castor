@@ -1,9 +1,10 @@
 .grid-wrapper {
-    display: grid;
-    grid-template-columns: 2fr;
-    grid-template-rows: 1fr;
+    display: table;
+    float: none;
+    box-sizing: border-box;
 }
 
 .qtr {
-    color: #05ff77;
+    display: block;
+    float: none;
 }
