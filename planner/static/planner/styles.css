@@ -2,25 +2,31 @@
     box-sizing: border-box; 
 }
 
-#content {
-    column-count: 2;
-}
-
-#unscheduled {
-    break-inside: avoid-column;
-}
-
-#scheduled {
+header {
     
 }
 
+header h1,p {
+    display: inline;
+    margin: .5em;
+}
+
+#content {
+    grid-template-columns: 1fr 1fr;
+}
+
+#unscheduled {
+   
+}
+
+#schedule-wrapper {
+    grid-template-columns: 1fr;
+}
 
 .grid-wrapper {
-    width: 50%;
     padding: 2em;
     display: grid;
     grid-template-columns: 1fr;
-    grid-auto-columns: 10px;
     align-items: right;
     /* column-gap: 1em; */
 }
@@ -31,4 +37,10 @@
 
 ._2022 {
     
+}
+
+.course-item {
+    padding: .5em;
+    background-color: beige;
+    border: 1px blue solid;
 }

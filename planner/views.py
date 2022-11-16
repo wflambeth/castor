@@ -44,6 +44,7 @@ def index(request):
 
     context = {
         # To be iterated on/pared down as we go
+        "user": request.user,
         "schedule": schedule,
         "courses": courses,
         "sched_courses": sched_courses,

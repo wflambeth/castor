@@ -7,14 +7,15 @@
 
 <body>
     <header>
-        <h1>{{ schedule.name }}</h1>
+        <h1 id="sched-name">{{ schedule.name }}</h1>
+        <p>{{ user.username }}</p>
     </header>
-    <section id="content">
+    <section id="content" class="grid-wrapper">
         <div id="unscheduled">
             <h2>Unscheduled Requirements</h2>
             <ul>
                 {% for course in unsched_req %}
-                <li> {{ course }} </li>
+                <li class="course-item"> {{ course }} </li>
                 {% endfor %}
             </ul>
 
@@ -22,12 +23,12 @@
             <h2>Unscheduled Electives</h2>
             <ul>
                 {% for course in unsched_elec%}
-                <li> {{ course }} </li>
+                <li class="course-item"> {{ course }} </li>
                 {% endfor %}
             </ul>
         </div>
-        <div id="scheduled">
-            <div class="grid-wrapper container">
+        <div id="schedule">
+            <div id="schedule-wrapper" class="grid-wrapper container">
                 {% for term, courses in sched_info.items %}
                 <div class="qtr grid _{{ term.0 }} _{{ term.1}}" id="_{{term.0}}_{{term.1}}">
                     <h4>{% if term.1 == 0 %}Winter
@@ -37,7 +38,7 @@
                         {%endif%}{{ term.0 }}</h4>
                     <ul>
                         {% for course in courses %}
-                        <li> {{course.course}} ({{course.course.credits}})</li>
+                        <li class="course-item"> {{course.course}}</li>
                         {% endfor %}
                     </ul>
                 </div>
