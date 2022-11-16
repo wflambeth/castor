@@ -40,11 +40,18 @@
                         {% elif term.1 == 3 %}Fall
                         {% endif %}{{term.0}}</h4>
                     <div class="course-container">
+                        
+                        {% if courses|length > 0 %}
                         {% for course in courses %}
                         <div class="course-item">
                             <span class="course-title">{{ course.course }}</span> 
                         </div>
                         {% endfor %}
+                        {% else %}
+                            <div class="course-item empty-item">
+                                <span class="empty-title course-title">drag here. delete button eventually --> [x]</span>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}

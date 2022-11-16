@@ -12,8 +12,8 @@ header h1,p {
 }
 
 #content {
-    grid-template-columns: 1fr 1fr;
-    margin: 0em 3em;
+    grid-template-columns: minmax(min-content, 30%) minmax(min-content, 30%);
+    margin-left: 20%;
     column-gap: 4em;
 }
 
@@ -46,6 +46,11 @@ header h1,p {
     padding: .5em;
     background-color: beige;
     border: 2px blue solid;
+}
+
+.empty-item {
+    border: 2px grey dotted;
+    background-color: aliceblue;
 }
 
 .course-title {
