@@ -10,15 +10,25 @@
     break-inside: avoid-column;
 }
 
+#scheduled {
+    
+}
+
+
 .grid-wrapper {
     width: 50%;
     padding: 2em;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr;
     grid-auto-columns: 10px;
+    align-items: right;
     /* column-gap: 1em; */
 }
 
 .qtr {
     display: block;
+}
+
+._2022 {
+    
 }

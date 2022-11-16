@@ -7,18 +7,10 @@
 
 <body>
     <header>
-
+        <h1>{{ schedule.name }}</h1>
     </header>
     <section id="content">
         <div id="unscheduled">
-            <h1>{{ schedule.name }}</h1>
-            <h2>Scheduled Courses</h2>
-            <ul>
-                {% for sc in sched_courses %}
-                <li>{{ sc.course }} {{ sc.year }} {{ sc.qtr }} </li>
-                {% endfor %}
-            </ul>
-
             <h2>Unscheduled Requirements</h2>
             <ul>
                 {% for course in unsched_req %}
@@ -36,9 +28,14 @@
         </div>
         <div id="scheduled">
             <div class="grid-wrapper container">
-                {% for qtr in qtr_set%}
-                <div class="qtr grid">
-                    {{ qtr.year }} {{ qtr.qtr}}
+                {% for term, courses in sched_info.items %}
+                <div class="qtr grid _{{ term.0 }} _{{ term.1}}" id="_{{term.0}}_{{term.1}}">
+                    <h4>{{ term.0 }} {{ term.1}}</h4>
+                    <ul>
+                        {% for course in courses %}
+                        <li> {{course.course}} </li>
+                        {% endfor %}
+                    </ul>
                 </div>
                 {% endfor %}
             </div>

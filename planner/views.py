@@ -23,19 +23,26 @@ def index(request):
 
     # create year/qtr list to iterate over
     # TODO: break into separate function
+
+    sched_info = {}
     qtr = schedule.start_qtr
     year = schedule.start_year
     qtr_set = []
     while year <= schedule.end_year:
         if year == schedule.end_year and qtr > schedule.end_qtr:
             break
+        
+        this_qtr = (year, qtr)
+        sched_info[this_qtr] = []
+        qtr_courses = sched_courses.filter(year=year,qtr=qtr)
+        for course in qtr_courses:
+            sched_info[this_qtr].append(course)
 
-        this_qtr = {'year':year, 'qtr':qtr}
-        qtr_set.append(this_qtr)
         qtr = qtr + 1 if qtr < 3 else 0
         if qtr == 0:
             year += 1
 
+    print(sched_info)
     context = {
         # To be iterated on/pared down as we go
         "schedule": schedule,
@@ -44,6 +51,7 @@ def index(request):
         "unsched_courses": unsched_courses,
         "unsched_req": unsched_req,
         "unsched_elec": unsched_elec,
-        "qtr_set": qtr_set
+        "qtr_set": qtr_set,
+        "sched_info": sched_info
     }
     return render(request, 'planner/index.html', context)
