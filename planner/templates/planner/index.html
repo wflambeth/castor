@@ -3,6 +3,7 @@
 <head>
     {% load static %}
     <link rel="stylesheet" href="{% static 'planner/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'planner/dragula.css' %}">
 </head>
 
 <body>
@@ -13,7 +14,7 @@
     <section id="content" class="grid-wrapper">
         <div id="unscheduled">
             <h2>Outstanding Requirements</h2>
-            <div class="course-container">
+            <div class="course-container" id="req-container">
                 {% for course in unsched_req %}
                 <div class="course-item">
                     <span class="course-title">{{ course }}</span> 
@@ -21,7 +22,7 @@
                 {% endfor %}
             </div>
             <h2>Available Electives</h2>
-            <div class="course-container">
+            <div class="course-container" id="elec-container">
                 {% for course in unsched_elec%}
                 <div class="course-item">
                     <span class="course-title">{{ course }}</span> 
@@ -40,7 +41,6 @@
                         {% elif term.1 == 3 %}Fall
                         {% endif %}{{term.0}}</h4>
                     <div class="course-container">
-                        
                         {% if courses|length > 0 %}
                         {% for course in courses %}
                         <div class="course-item">
@@ -60,5 +60,7 @@
 
     </section>
     <footer>
+        <script src="{% static 'planner/dragula.js' %}"></script>
+        <script src="{% static 'planner/dragging.js' %}"></script>
     </footer>
 </body>
