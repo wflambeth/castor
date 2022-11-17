@@ -35,6 +35,7 @@ header h1,p {
 
 .qtr {
     display: block;
+    height: 100%;
 }
 
 ._2022 {
@@ -54,5 +55,15 @@ header h1,p {
 }
 
 .course-title {
-    padding-left: 5%;
+    padding: 5%;
+}
+
+.course-container {
+    padding: .3em 0em;
+}
+
+.term-title {
+    padding-left: 3%;
+    font-weight: bold;
+    padding: 3% 0%;
 }
