@@ -12,6 +12,7 @@
     <header>
         <h1 id="sched-name">{{ schedule.name }}</h1>
         <p>{{ user.username }}</p>
+        <button id="submit-button">Save Schedule</button>
     </header>
     <section id="content" class="grid-wrapper">
         <div id="unscheduled">
@@ -63,5 +64,6 @@
 
     </section>
     <footer>
+        <script>var page_sched_id = {{schedule.id}};</script>
     </footer>
 </body>
