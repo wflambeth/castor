@@ -54,5 +54,4 @@ def index(request):
         "qtr_set": qtr_set,
         "sched_info": sched_info
     }
-    print(sched_info)
     return render(request, 'planner/index.html', context)
