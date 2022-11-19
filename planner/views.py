@@ -1,5 +1,8 @@
+import json
 from django.shortcuts import HttpResponse, render
 from django.template import loader
+from django.core import serializers
+from django.http import JsonResponse
 from .models import Course, Schedule, Course_Schedule, Prereq
 
 def index(request):
@@ -55,3 +58,10 @@ def index(request):
         "sched_info": sched_info
     }
     return render(request, 'planner/index.html', context)
+
+def save(request):
+    changes = json.loads(request.body)
+
+    #print(changes['courses']['271'])
+    return JsonResponse({'status': 'saved', 'schedule': 'TK'}, status=200)
+    

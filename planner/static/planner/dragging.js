@@ -19,14 +19,17 @@ function dropLogger(el, target, source, sibling) {
 }
 
 function saveSchedule() {
-  console.log(page_sched_id);
-  fetch('http://127.0.0.1:8000/csp/save', {
-    method: 'POST', 
-    headers: {
+  const request = new Request(
+    'http://127.0.0.1:8000/csp/save',
+    {headers: {
+      'X-CSRFToken': csrftoken,
       'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(POST_changes),
-  })
+    },body: JSON.stringify(POST_changes),
+  method: 'POST'}
+  );
+  fetch(request, {
+    method: 'POST', 
+    mode: 'same-origin'})
   .then((response) => response.json())
   .then((data) => {
     console.log('Success: ', data);
@@ -39,4 +42,5 @@ function saveSchedule() {
 let btn = document.getElementById('submit-button');
 btn.addEventListener("click", saveSchedule);
 
-let POST_changes = {s: page_sched_id, courses: {}}
+const POST_changes = {s: page_sched_id, courses: {}};
+const csrftoken = Cookies.get('csrftoken');
