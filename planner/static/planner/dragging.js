@@ -10,7 +10,7 @@ drake.on('drop', dropLogger);
 
 function dropLogger(el, target, source, sibling) {
   if (target !== source) {
-    let id = el.getAttribute('id');
+    let id = el.getAttribute('data-id');
     let year = target.getAttribute('data-yr');
     let qtr = target.getAttribute('data-qtr');
     console.log(id, year, qtr);
@@ -34,12 +34,9 @@ function saveSchedule() {
   .catch((error) => {
     console.log('Error:', error);
   });
-
 }
 
 let btn = document.getElementById('submit-button');
 btn.addEventListener("click", saveSchedule);
 
-// next step: add drop events to include info here
-// store course and updated info
 let POST_changes = {s: page_sched_id, courses: {}}
