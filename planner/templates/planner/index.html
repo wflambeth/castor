@@ -4,6 +4,8 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'planner/styles.css' %}">
     <link rel="stylesheet" href="{% static 'planner/dragula.css' %}">
+    <script defer src="{% static 'planner/dragula.js' %}"></script>
+    <script defer src="{% static 'planner/dragging.js' %}"></script>
 </head>
 
 <body>
@@ -61,7 +63,5 @@
 
     </section>
     <footer>
-        <script src="{% static 'planner/dragula.js' %}"></script>
-        <script src="{% static 'planner/dragging.js' %}"></script>
     </footer>
 </body>
