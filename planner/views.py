@@ -1,8 +1,7 @@
 import json
 from django.shortcuts import HttpResponse, render
 from django.template import loader
-from django.core import serializers
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequest
 from .models import Course, Schedule, Course_Schedule, Prereq
 
 def index(request):
@@ -60,8 +59,36 @@ def index(request):
     return render(request, 'planner/index.html', context)
 
 def save(request):
-    changes = json.loads(request.body)
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden('Not logged in')
+    data = json.loads(request.body)
+    schedule = Schedule.objects.filter(user=request.user).get(id=int(data['s']))
+    
+    if not schedule:
+        return HttpResponseBadRequest('Schedule not found')
+    
+    for crs_id, term in data['courses'].items():
+        print('crs_id:' + crs_id)
+        course = Course.objects.get(course_number=int(crs_id))
+        print('course:' + str(course))
+        print('schedule:' + str(schedule))
+        crs_sch = Course_Schedule.objects.filter(schedule=schedule).filter(course=course)
+        
+        # removing items from current schedule
+        if not term['year'] or term['year'] == 'null':
+            if crs_sch.exists():
+                crs_sch.delete()
+                continue
+        
+        # instantiating our QuerySet if info is to be saved
+        if not crs_sch.exists():
+            crs_sch = Course_Schedule(course=course, schedule=schedule)
+        else:
+            crs_sch = crs_sch[0]
+        
+        crs_sch.year = term['year']
+        crs_sch.qtr = term['qtr']
+        crs_sch.save()
 
-    #print(changes['courses']['271'])
-    return JsonResponse({'status': 'saved', 'schedule': 'TK'}, status=200)
+    return JsonResponse({'status': 'saved', 'schedule': schedule.id}, status=200)
     
