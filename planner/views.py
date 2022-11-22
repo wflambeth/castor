@@ -29,7 +29,6 @@ def index(request):
     sched_terms = {}
     qtr = schedule.start_qtr
     year = schedule.start_year
-    qtr_set = []
     while year <= schedule.end_year:
         if year == schedule.end_year and qtr > schedule.end_qtr:
             break
