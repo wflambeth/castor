@@ -45,7 +45,6 @@ def index(request):
             year += 1
 
     context = {
-        "username": request.user.username,
         "schedule": schedule,
         "sched_terms": sched_terms,
         "unsched_req": unsched_req,
