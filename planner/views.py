@@ -26,28 +26,35 @@ def index(request):
     # create year/qtr list to iterate over
     # TODO: break into separate function
 
-    sched_terms = {}
+    sched_info = {}
     qtr = schedule.start_qtr
     year = schedule.start_year
+    qtr_set = []
     while year <= schedule.end_year:
         if year == schedule.end_year and qtr > schedule.end_qtr:
             break
         
         this_qtr = (year, qtr)
-        sched_terms[this_qtr] = []
+        sched_info[this_qtr] = []
         qtr_courses = sched_courses.filter(year=year,qtr=qtr)
         for course in qtr_courses:
-            sched_terms[this_qtr].append(course)
+            sched_info[this_qtr].append(course)
 
         qtr = qtr + 1 if qtr < 3 else 0
         if qtr == 0:
             year += 1
 
     context = {
+        # To be iterated on/pared down as we go
+        "user": request.user,
         "schedule": schedule,
-        "sched_terms": sched_terms,
+        "courses": courses,
+        "sched_courses": sched_courses,
+        "unsched_courses": unsched_courses,
         "unsched_req": unsched_req,
-        "unsched_elec": unsched_elec
+        "unsched_elec": unsched_elec,
+        "qtr_set": qtr_set,
+        "sched_info": sched_info
     }
     return render(request, 'planner/index.html', context)
 
@@ -57,7 +64,7 @@ def save(request):
     data = json.loads(request.body)
     schedule = Schedule.objects.filter(user=request.user).get(id=int(data['s']))
     
-    if not schedule:
+    if not schedule: # TODO: .get() above will throw an exception, so this won't ever fire
         return HttpResponseBadRequest('Schedule not found')
     
     for crs_id, term in data['courses'].items():
@@ -77,7 +84,7 @@ def save(request):
         if not crs_sch.exists():
             crs_sch = Course_Schedule(course=course, schedule=schedule)
         else:
-            crs_sch = crs_sch[0]
+            crs_sch = crs_sch[0] # TODO: kinda messy to be using same name for this and the other
         
         crs_sch.year = term['year']
         crs_sch.qtr = term['qtr']
