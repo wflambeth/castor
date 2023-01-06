@@ -7,6 +7,10 @@ header h1,p {
     margin: .5em;
 }
 
+#submit-button {
+    margin-left: 30px; 
+}
+
 #content {
     grid-template-columns: minmax(min-content, 30%) minmax(min-content, 30%);
     margin-left: 20%;

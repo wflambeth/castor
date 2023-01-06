@@ -128,3 +128,4 @@ AUTH_USER_MODEL = 'planner.User'
 
 # Send users to homepage after logging in
 LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/accounts/login"

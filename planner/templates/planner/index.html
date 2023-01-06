@@ -13,6 +13,7 @@
     <header>
         <h1 id="sched-name">{{ schedule.name }}</h1>
         <p>{{ schedule.user.username }}</p>
+        <a href="{% url 'logout' %}">(log out)</a>
         <button id="submit-button">Save Schedule</button>
     </header>
     <section id="content" class="grid-wrapper">
