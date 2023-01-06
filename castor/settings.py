@@ -125,3 +125,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Overwrote default Django user model w/ extensible custom
 AUTH_USER_MODEL = 'planner.User'
+
+# Send users to homepage after logging in
+LOGIN_REDIRECT_URL = "/"

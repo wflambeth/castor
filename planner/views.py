@@ -2,8 +2,10 @@ import json
 from django.shortcuts import HttpResponse, render
 from django.template import loader
 from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequest
+from django.contrib.auth.decorators import login_required
 from .models import Course, Schedule, Course_Schedule, Prereq
 
+@login_required
 def index(request):
     if not request.user.is_authenticated:
         # TODO: load the template with no prepopulated schedule info
