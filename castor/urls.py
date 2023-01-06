@@ -17,6 +17,6 @@ from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
-    path('csp/', include('planner.urls')),
+    path('', include('planner.urls')),
     path("admin/", admin.site.urls),
 ]
