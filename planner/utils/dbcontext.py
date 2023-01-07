@@ -21,17 +21,13 @@ def no_auth():
     return context
 
 def schedule(schedule):
-    # TODO: find a way to order these (last edited would be good; needs a model update. maybe most recently created?)
-    # Currently, this will always display only the first schedule
-    schedule = schedule[0]
-
     sched_courses = Course_Schedule.objects.filter(schedule=schedule)
     unsched_courses = Course.objects.all().exclude(course_number__in=sched_courses.values('course'))
 
     sched_qtrs = {}
-    
     qtr = schedule.start_qtr
     year = schedule.start_year
+
     while year <= schedule.end_year:
         if year == schedule.end_year and qtr > schedule.end_qtr:
             break

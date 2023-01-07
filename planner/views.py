@@ -10,16 +10,21 @@ def index(request):
     if not request.user.is_authenticated:
         return render(request, 'planner/index.html', dbc.no_auth())
 
-    schedule = Schedule.objects.filter(user=request.user)
-    
-    if schedule.exists():
-        # TODO: neater way of doing this, without passing request object to module
-        context = dbc.schedule(schedule)
-        context['user'] = request.user
-        return render(request, 'planner/index.html', context)
-    else:
-        # return render(request, 'planner/index.html', TODO some context showing that it's blank)
+    # Altering to retrieve both a specific schedule (to render) and the full list of schedules (for dropdown)
+    sched_list = Schedule.objects.filter(user=request.user)
+    id = request.GET.get('id', 1)
+
+    try: 
+        schedule = sched_list.get(id=id)
+    except Schedule.DoesNotExist:
         pass
+        # TODO: new user/no schedules, we'll create one for them 
+
+    context = dbc.schedule(schedule)
+    context['user'] = request.user
+    context['sched_list'] = sched_list
+    return render(request, 'planner/index.html', context)
+
 
 def save(request):
     if not request.user.is_authenticated:

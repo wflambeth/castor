@@ -34,10 +34,13 @@ class Schedule(models.Model):
     start_year = models.PositiveSmallIntegerField() 
     end_year = models.PositiveSmallIntegerField()
 
+    class Meta:
+        ordering = ['id']
+
     # TODO: add check constraint for start < end
 
     def __str__(self):
-        return self.name
+        return str(self.id) + ' - ' + self.name
 
 class Course_Schedule(models.Model):
     schedule = models.ForeignKey('Schedule', on_delete=models.CASCADE)
