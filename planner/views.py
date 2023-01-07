@@ -11,46 +11,15 @@ def index(request):
         return render(request, 'planner/index.html', dbc.no_auth())
 
     schedule = Schedule.objects.filter(user=request.user)
-    if not schedule.exists():
-        # TODO: separate view branch for users who have no schedules but are logged in
-        pass
-    else:
-        schedule = schedule[0] #TODO: order these schedules somehow (last edited would be good - needs a model update)
     
-    courses = Course.objects.all()
-    sched_courses = Course_Schedule.objects.filter(schedule=schedule)
-    unsched_courses = courses.exclude(course_number__in=sched_courses.values('course'))
-    unsched_req = unsched_courses.filter(required=True)
-    unsched_elec = unsched_courses.filter(required=False)
-
-    # create year/qtr list to iterate over
-    # TODO: break into separate function
-
-    sched_qtrs = {}
-    qtr = schedule.start_qtr
-    year = schedule.start_year
-    while year <= schedule.end_year:
-        if year == schedule.end_year and qtr > schedule.end_qtr:
-            break
-        
-        this_qtr = (year, qtr)
-        sched_qtrs[this_qtr] = []
-        qtr_courses = sched_courses.filter(year=year,qtr=qtr)
-        for course in qtr_courses:
-            sched_qtrs[this_qtr].append(course)
-
-        qtr = qtr + 1 if qtr < 3 else 0
-        if qtr == 0:
-            year += 1
-
-    context = {
-        "user": request.user,
-        "schedule": schedule,
-        "unsched_req": unsched_req,
-        "unsched_elec": unsched_elec,
-        "sched_qtrs": sched_qtrs
-    }
-    return render(request, 'planner/index.html', context)
+    if schedule.exists():
+        # TODO: neater way of doing this, without passing request object to module
+        context = dbc.schedule(schedule)
+        context['user'] = request.user
+        return render(request, 'planner/index.html', context)
+    else:
+        # return render(request, 'planner/index.html', TODO some context showing that it's blank)
+        pass
 
 def save(request):
     if not request.user.is_authenticated:
