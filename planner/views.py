@@ -24,10 +24,11 @@ def index(request):
 def save(request):
     if not request.user.is_authenticated:
         return HttpResponseForbidden('Not logged in')
-    data = json.loads(request.body)
-    schedule = Schedule.objects.filter(user=request.user).get(id=int(data['s']))
     
-    if not schedule: # TODO: .get() above will throw an exception, so this won't ever fire
+    data = json.loads(request.body)
+    try:
+        schedule = Schedule.objects.filter(user=request.user).get(id=int(data['s']))
+    except Schedule.DoesNotExist:
         return HttpResponseBadRequest('Schedule not found')
     
     for crs_id, term in data['courses'].items():
