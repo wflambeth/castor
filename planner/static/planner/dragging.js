@@ -25,7 +25,7 @@ function dropLogger(el, target, source, sibling) {
 if (auth) {
   function saveSchedule() {
     const request = new Request(
-      'http://127.0.0.1:8000/csp/save',
+      save_path,
       {headers: {
         'X-CSRFToken': csrftoken,
         'Content-Type': 'application/json',

@@ -75,6 +75,7 @@
             {% if user.is_authenticated %}
             var page_sched_id = {{schedule.id}};
             var auth = true;
+            var save_path = "{% url 'save' %}"
             {% else %}
             var page_sched_id = "";
             var auth = false;
