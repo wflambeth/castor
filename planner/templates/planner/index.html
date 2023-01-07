@@ -13,7 +13,7 @@
     <header>
     {% if user.is_authenticated %}
         <h1 id="sched-name">{{ schedule.name }}</h1>
-        <p>{{ schedule.user.username }}</p>
+        <p>{{ user.username }}</p>
         <a href="{% url 'logout' %}">(log out)</a>
         <button id="submit-button">Save Schedule</button>
     {% else %}
@@ -43,7 +43,7 @@
 
         <div id="schedule">
             <div id="schedule-wrapper" class="term-container grid-wrapper container">
-                {% for term, courses in sched_info.items %}
+                {% for term, courses in sched_qtrs.items %}
                 <div class="qtr grid" id="_{{term.0}}_{{term.1}}">
                     <div class="term-title">{% if term.1 == 0 %}Winter
                         {% elif term.1 == 1 %}Spring
