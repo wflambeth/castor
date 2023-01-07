@@ -4,20 +4,30 @@ from django.template import loader
 from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequest
 from django.contrib.auth.decorators import login_required
 from .models import Course, Schedule, Course_Schedule, Prereq
+from datetime import datetime
 
-@login_required
 def index(request):
     if not request.user.is_authenticated:
-        # TODO: load the template with no prepopulated schedule info
-        # Have a default context that loads when no schedules exist?
-        pass
+        # TODO: still work in progress
+        sched_info = {}
+        year = datetime.now().year
+        for i in range(4):
+            sched_info[(year,i)] = []
+
+        context = {
+            "unsched_req": Course.objects.filter(required=True),
+            "unsched_elec": Course.objects.filter(required=False),
+            "sched_info": sched_info
+        }
+
+        return render(request, 'planner/index.html', context)
 
     schedule = Schedule.objects.filter(user=request.user)
     if not schedule.exists():
-        # same as above, I'm pretty sure, since user will also be authenticated on create request
+        # TODO: separate view branch for users who have no schedules but are logged in
         pass
     else:
-        schedule = schedule[0] # order is undefined here; use last_edited eventually
+        schedule = schedule[0] #TODO: order these schedules somehow (last edited would be good - needs a model update)
     
     courses = Course.objects.all()
     sched_courses = Course_Schedule.objects.filter(schedule=schedule)
@@ -31,7 +41,7 @@ def index(request):
     sched_info = {}
     qtr = schedule.start_qtr
     year = schedule.start_year
-    qtr_set = []
+    qtr_set = [] #TODO: remove this? looks useless
     while year <= schedule.end_year:
         if year == schedule.end_year and qtr > schedule.end_qtr:
             break
