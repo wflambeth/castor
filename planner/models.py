@@ -17,6 +17,9 @@ class Course(models.Model):
     qtrs = ArrayField(models.PositiveSmallIntegerField(), size=4)
     required = models.BooleanField(default=False)
 
+    class Meta:
+        ordering = ['course_number']
+
     def __str__(self):
         return "CS " + str(self.course_number) + " - " + str(self.title)
 

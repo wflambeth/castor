@@ -21,7 +21,7 @@ def no_auth():
     return context
 
 def schedule(schedule):
-    sched_courses = Course_Schedule.objects.filter(schedule=schedule)
+    sched_courses = Course_Schedule.objects.filter(schedule=schedule).order_by('course__course_number')
     unsched_courses = Course.objects.all().exclude(course_number__in=sched_courses.values('course'))
 
     sched_qtrs = {}
