@@ -22,13 +22,11 @@ def no_auth():
 
 def schedule(schedule):
     # TODO: find a way to order these (last edited would be good; needs a model update. maybe most recently created?)
+    # Currently, this will always display only the first schedule
     schedule = schedule[0]
 
-    courses = Course.objects.all() # can I combine this with unsched_courses below in a single query?
     sched_courses = Course_Schedule.objects.filter(schedule=schedule)
     unsched_courses = Course.objects.all().exclude(course_number__in=sched_courses.values('course'))
-    unsched_req = unsched_courses.filter(required=True)
-    unsched_elec = unsched_courses.filter(required=False)
 
     sched_qtrs = {}
     
@@ -39,8 +37,7 @@ def schedule(schedule):
             break
 
         sched_qtrs[(year, qtr)] = []
-        qtr_courses = sched_courses.filter(year=year, qtr=qtr) # TODO: can I collapse this line with the one below it? 
-        for course in qtr_courses:
+        for course in sched_courses.filter(year=year, qtr=qtr):
             sched_qtrs[(year, qtr)].append(course)
         
         qtr = qtr + 1 if qtr < 3 else 0 
@@ -49,11 +46,10 @@ def schedule(schedule):
     
     context = {
         "schedule": schedule,
-        "unsched_req": unsched_req,
-        "unsched_elec": unsched_elec,
+        "unsched_req": unsched_courses.filter(required=True),
+        "unsched_elec": unsched_courses.filter(required=False),
         "sched_qtrs": sched_qtrs
     }
-
 
     return context
 
