@@ -52,8 +52,3 @@ def schedule(schedule):
     }
 
     return context
-
-
-
-
-
