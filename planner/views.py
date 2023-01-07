@@ -1,26 +1,14 @@
 import json
+import planner.utils.dbcontext as dbc
 from django.shortcuts import HttpResponse, render
 from django.template import loader
 from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequest
 from django.contrib.auth.decorators import login_required
-from .models import Course, Schedule, Course_Schedule, Prereq
-from datetime import datetime
+from planner.models import Course, Schedule, Course_Schedule, Prereq
 
 def index(request):
     if not request.user.is_authenticated:
-        # TODO: still work in progress
-        sched_qtrs = {}
-        year = datetime.now().year
-        for i in range(4):
-            sched_qtrs[(year,i)] = []
-
-        context = {
-            "unsched_req": Course.objects.filter(required=True),
-            "unsched_elec": Course.objects.filter(required=False),
-            "sched_qtrs": sched_qtrs
-        }
-
-        return render(request, 'planner/index.html', context)
+        return render(request, 'planner/index.html', dbc.no_auth())
 
     schedule = Schedule.objects.filter(user=request.user)
     if not schedule.exists():
