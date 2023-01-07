@@ -32,10 +32,7 @@ def save(request):
         return HttpResponseBadRequest('Schedule not found')
     
     for crs_id, term in data['courses'].items():
-        print('crs_id:' + crs_id)
         course = Course.objects.get(course_number=int(crs_id))
-        print('course:' + str(course))
-        print('schedule:' + str(schedule))
         crs_sch = Course_Schedule.objects.filter(schedule=schedule).filter(course=course)
         
         # removing items from current schedule
