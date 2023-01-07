@@ -31,25 +31,28 @@ def save(request):
     except Schedule.DoesNotExist:
         return HttpResponseBadRequest('Schedule not found')
     
+    #TODO: pretty messy, could use a refactor
     for crs_id, term in data['courses'].items():
         course = Course.objects.get(course_number=int(crs_id))
         crs_sch = Course_Schedule.objects.filter(schedule=schedule).filter(course=course)
         
-        # removing items from current schedule
+        # For courses to be removed from schedule, delete and skip to next loop
         if not term['year'] or term['year'] == 'null':
             if crs_sch.exists():
                 crs_sch.delete()
                 continue
-        
-        # instantiating our QuerySet if info is to be saved
+
+        # For courses not yet in schedule, create new course_schedule object 
         if not crs_sch.exists():
             crs_sch = Course_Schedule(course=course, schedule=schedule)
         else:
-            crs_sch = crs_sch[0] # TODO: kinda messy to be using same name for this and the other
+            # For existing course_schedules, need to pull object out of queryset
+            crs_sch = crs_sch[0] 
         
+        # Update course info and save
         crs_sch.year = term['year']
         crs_sch.qtr = term['qtr']
-        crs_sch.save()
+        crs_sch.save() #TODO: exception handling
 
     return JsonResponse({'status': 'saved', 'schedule': schedule.id}, status=200)
     
