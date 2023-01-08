@@ -1,19 +1,28 @@
 import json
 import planner.utils.dbcontext as dbc
-from django.shortcuts import HttpResponse, render
+from django.shortcuts import HttpResponse, render, redirect
 from django.template import loader
 from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequest
 from django.contrib.auth.decorators import login_required
 from planner.models import Course, Schedule, Course_Schedule, Prereq
 
 def index(request):
+    # Option 1: user is logged out; show 'demo' schedule
     if not request.user.is_authenticated:
         return render(request, 'planner/index.html', dbc.no_auth())
 
     sched_list = Schedule.objects.filter(user=request.user)
 
-    if sched_list.exists():
-        # user has existing schedules; try to parse ID from query params
+    # Option 2: user is logged in and does not have any schedules
+    # Option 3: user is requesting to create a new schedule, and is under limit
+    if not sched_list.exists() or request.GET.get('create') and len(sched_list) < 10:
+        # in either case, create blank schedule and redirect user there
+        schedule = dbc.blank_schedule(request.user)
+        schedule.save()
+        return redirect(f'/?id={schedule.id}')
+        
+    # Option 4: user is requesting an existing schedule
+    else:
         id = request.GET.get('id')
         if id:
             try: 
@@ -21,16 +30,12 @@ def index(request):
             except Schedule.DoesNotExist:
                 schedule = sched_list[0]
         else:
-            # if no ID passed, return one with lowest ID
+            # if no ID passed, return oldest one
             schedule = sched_list[0]
-    else:
-        # no current schedules, create new one for user
-        schedule = dbc.blank_schedule(request.user)
-        schedule.save()
     
     context = dbc.schedule(schedule)
     context['user'] = request.user
-    context['sched_list'] = sched_list if sched_list.exists() else [schedule]
+    context['sched_list'] = sched_list
     return render(request, 'planner/index.html', context)
 
 def save(request):
