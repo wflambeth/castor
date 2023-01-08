@@ -26,7 +26,11 @@
             <h4>My schedules</h4>
             <ul>
             {% for sched in sched_list %}
+            {% if sched.id == schedule.id %}
             <li>{{ sched.name }}</li>
+            {% else %}
+            <li><a href="{% url 'index' %}?id={{ sched.id }}">{{ sched.name }}</a></li>
+            {% endif %}
             {% endfor %}
             </ul>
         </div>
