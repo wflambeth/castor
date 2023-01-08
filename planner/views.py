@@ -12,7 +12,6 @@ def index(request):
         return render(request, 'planner/index.html', dbc.no_auth())
 
     sched_list = Schedule.objects.filter(user=request.user)
-
     # Option 2: user is logged in and does not have any schedules
     # Option 3: user is requesting to create a new schedule, and is under limit
     if not sched_list.exists() or request.GET.get('create') and len(sched_list) < 10:
@@ -22,16 +21,15 @@ def index(request):
         return redirect(f'/?id={schedule.id}')
         
     # Option 4: user is requesting an existing schedule
-    else:
-        id = request.GET.get('id')
-        if id:
-            try: 
-                schedule = sched_list.get(id=id)
-            except Schedule.DoesNotExist:
-                schedule = sched_list[0]
-        else:
-            # if no ID passed, return oldest one
+    id = request.GET.get('id')
+    if id:
+        try: 
+            schedule = sched_list.get(id=id)
+        except Schedule.DoesNotExist:
             schedule = sched_list[0]
+    else:
+        # if no ID passed, return oldest one
+        schedule = sched_list[0]
     
     context = dbc.schedule(schedule)
     context['user'] = request.user
@@ -72,4 +70,3 @@ def save(request):
         crs_sch.save() #TODO: exception handling
 
     return JsonResponse({'status': 'saved', 'schedule': schedule.id}, status=200)
-    
