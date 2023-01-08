@@ -12,11 +12,11 @@ header h1,p {
 }
 
 #content {
-    grid-template-columns: minmax(min-content, 30%) minmax(min-content, 30%);
-    margin-left: 20%;
-    column-gap: 4em;
+    grid-template-columns: minmax(min-content, 13%) minmax(min-content, 35%) minmax(min-content, 35%);
+    margin-left: 2%;
+    margin-right: 2%;
+    column-gap: 6em;
 }
-
 #schedule-wrapper {
     grid-template-columns: 1fr;
 }

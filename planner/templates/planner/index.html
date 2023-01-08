@@ -22,6 +22,15 @@
     {% endif %}
     </header>
     <section id="content" class="grid-wrapper">
+        <div id="schedule-list">
+            <h4>My schedules</h4>
+            <ul>
+            {% for sched in sched_list %}
+            <li>{{ sched.name }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+
         <div id="unscheduled">
             <h2>Outstanding Requirements</h2>
             <div class="course-container" id="req-container">

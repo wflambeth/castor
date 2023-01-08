@@ -30,7 +30,7 @@ def index(request):
     
     context = dbc.schedule(schedule)
     context['user'] = request.user
-    context['sched_list'] = sched_list if sched_list.exists() else None #TODO: is this necessary? 
+    context['sched_list'] = sched_list if sched_list.exists() else [schedule]
     return render(request, 'planner/index.html', context)
 
 def save(request):
