@@ -22,17 +22,20 @@
     {% endif %}
     </header>
     <section id="content" class="grid-wrapper">
-        <div id="schedule-list">
+        <div id="schedules-list">
             <h4>My schedules</h4>
-            <ul>
             {% for sched in sched_list %}
-            {% if sched.id == schedule.id %}
-            <li>{{ sched.name }}</li>
-            {% else %}
-            <li><a href="{% url 'index' %}?id={{ sched.id }}">{{ sched.name }}</a></li>
-            {% endif %}
+            <div class="schedules-item">
+                {% if sched.id == schedule.id %}
+                <span>{{ sched.name }}</span>
+                {% else %}
+                <span><a href="{% url 'index' %}?id={{ sched.id }}">{{ sched.name }}</a></span>
+                {% endif %}
+            </div>
             {% endfor %}
-            </ul>
+            <div class="schedules-item" id="create-sched">
+                <a href="">Create New Schedule</a>
+            </div>
         </div>
 
         <div id="unscheduled">
