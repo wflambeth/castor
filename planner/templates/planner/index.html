@@ -27,9 +27,9 @@
             {% for sched in sched_list %}
             <div class="schedules-item">
                 {% if sched.id == schedule.id %}
-                <span>{{ sched.name }}</span>
+                <span>{{ sched.name }}   <a class="delete-sched" href="{% url 'delete' %}?id={{ sched.id }}">[x]</a></span>
                 {% else %}
-                <span><a href="{% url 'index' %}?id={{ sched.id }}">{{ sched.name }}</a></span>
+                <span><a href="{% url 'index' %}?id={{ sched.id }}">{{ sched.name }}</a>   <a class="delete-sched" href="{% url 'delete' %}?id={{ sched.id }}">[x]</a></span>
                 {% endif %}
             </div>
             {% endfor %}

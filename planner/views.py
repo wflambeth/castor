@@ -70,3 +70,17 @@ def save(request):
         crs_sch.save() #TODO: exception handling
 
     return JsonResponse({'status': 'saved', 'schedule': schedule.id}, status=200)
+
+@login_required
+def delete(request):
+    id = request.GET.get('id')
+    if not id:
+        return HttpResponseBadRequest('No schedule ID provided')
+    
+    try: 
+        schedule = Schedule.objects.filter(user=request.user).get(id=id)
+    except Schedule.DoesNotExist:
+        return HttpResponseBadRequest('Schedule not found')
+    
+    schedule.delete()
+    return redirect('index')
