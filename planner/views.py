@@ -10,21 +10,28 @@ def index(request):
     if not request.user.is_authenticated:
         return render(request, 'planner/index.html', dbc.no_auth())
 
-    # Altering to retrieve both a specific schedule (to render) and the full list of schedules (for dropdown)
     sched_list = Schedule.objects.filter(user=request.user)
-    id = request.GET.get('id', 1)
 
-    try: 
-        schedule = sched_list.get(id=id)
-    except Schedule.DoesNotExist:
-        pass
-        # TODO: new user/no schedules, we'll create one for them 
-
+    if sched_list.exists():
+        # user has existing schedules; try to parse ID from query params
+        id = request.GET.get('id')
+        if id:
+            try: 
+                schedule = sched_list.get(id=id)
+            except Schedule.DoesNotExist:
+                schedule = sched_list[0]
+        else:
+            # if no ID passed, return one with lowest ID
+            schedule = sched_list[0]
+    else:
+        # no current schedules, create new one for user
+        schedule = dbc.blank_schedule(request.user)
+        schedule.save()
+    
     context = dbc.schedule(schedule)
     context['user'] = request.user
-    context['sched_list'] = sched_list
+    context['sched_list'] = sched_list if sched_list.exists() else None #TODO: is this necessary? 
     return render(request, 'planner/index.html', context)
-
 
 def save(request):
     if not request.user.is_authenticated:

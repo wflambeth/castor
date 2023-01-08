@@ -48,3 +48,17 @@ def schedule(schedule):
     }
 
     return context
+
+def blank_schedule(user):
+    year = datetime.now().year
+
+    schedule = Schedule (
+        user = user,
+        start_qtr = 0,
+        end_qtr = 3,
+        start_year = year,
+        end_year = year
+    )
+
+    return schedule
+
