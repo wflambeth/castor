@@ -39,7 +39,7 @@
         </div>
 
         <div id="unscheduled">
-            <h2>Outstanding Requirements</h2>
+            <h2>Required Courses</h2>
             <div class="course-container" id="req-container">
                 {% for course in unsched_req %}
                 <div class="course-item" data-id="{{course.course_number}}">
@@ -47,7 +47,7 @@
                 </div>
                 {% endfor %}
             </div>
-            <h2>Available Electives</h2>
+            <h2>Electives</h2>
             <div class="course-container" id="elec-container">
                 {% for course in unsched_elec%}
                 <div class="course-item" data-id="{{course.course_number}}">
