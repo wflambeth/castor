@@ -12,7 +12,7 @@
 <body>
     <header>
     {% if user.is_authenticated %}
-        <h1 id="sched-name">{{ schedule.name }}</h1>
+        <span><h1 id="sched-name">{{ schedule.name }}</h1><a href="#" id="edit-title">(edit)</a></span>
         <p>{{ user.username }}</p>
         <a href="{% url 'logout' %}">(log out)</a>
         <button id="submit-button">Save Schedule</button>
@@ -94,6 +94,7 @@
             var page_sched_id = {{schedule.id}};
             var auth = true;
             var save_path = "{% url 'save' %}"
+            var update_title_path = "{% url 'update_title' %}"
             {% else %}
             var page_sched_id = "";
             var auth = false;

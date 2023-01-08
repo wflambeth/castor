@@ -44,8 +44,63 @@ if (auth) {
     });
   }
 
-  let btn = document.getElementById('submit-button');
-  btn.addEventListener("click", saveSchedule);
+  let saveBtn = document.getElementById('submit-button');
+  saveBtn.addEventListener("click", saveSchedule);
+
+  function updateTitle(text) {
+
+    const title_POST_info = {
+      'schedule': page_sched_id,
+      'title': text
+    }
+
+    const request = new Request(
+      update_title_path,
+      {headers: {
+        'X-CSRFToken': csrftoken,
+        'Content-Type': 'application/json',
+      },body: JSON.stringify(title_POST_info),
+      method: 'POST'}
+    );
+    fetch(request, {
+      method: 'POST',
+      mode: 'same-origin'})
+    .then((response) => response.json())
+    .then((data) => {
+      console.log('Success: ', data);
+    })
+    .catch((error) => {
+      console.log('Error:', error);
+    })
+  };
+  
+  let editing = false;
+  let title = document.getElementById('sched-name');
+  let titleEditLink = document.getElementById('edit-title');
+  titleEditLink.addEventListener("click", (event) => {
+    event.preventDefault();
+    if (editing === false) {
+      title.setAttribute('contentEditable', 'true');
+      title.focus();
+
+      // Selects all text in the title, shoutout StackOverflow:
+      // https://stackoverflow.com/questions/6139107/programmatically-select-text-in-a-contenteditable-html-element
+      // TODO: this looks terrible, breaks header (could just use a popup instead)?
+      let range = document.createRange();
+      range.selectNodeContents(title);
+      let sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+
+      titleEditLink.textContent = '(save)'
+      editing = true;
+    } else {
+      title.setAttribute('contentEditable', 'false');
+      titleEditLink.textContent = '(edit)'
+      editing = false;
+      updateTitle(title.innerText);
+    }
+  });
 }
 
 const POST_changes = {s: page_sched_id, courses: {}};

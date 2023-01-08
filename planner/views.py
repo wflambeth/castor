@@ -36,8 +36,8 @@ def index(request):
     context['sched_list'] = sched_list
     return render(request, 'planner/index.html', context)
 
-def save(request):
-    if not request.user.is_authenticated:
+def save(request): 
+    if not request.user.is_authenticated: #TODO: do I need this? better to just use the decorator?
         return HttpResponseForbidden('Not logged in')
     
     data = json.loads(request.body)
@@ -84,3 +84,23 @@ def delete(request):
     
     schedule.delete()
     return redirect('index')
+
+@login_required
+def update_title(request):
+    data = json.loads(request.body)
+
+    try:
+        schedule = Schedule.objects.filter(user=request.user).get(id=int(data['schedule']))
+    except Schedule.DoesNotExist:
+        return HttpResponseBadRequest('Schedule not found')
+
+    title = data.get('title')
+    if title is None:
+        return HttpResponseBadRequest('Title not found')
+    
+    schedule.name = title
+    schedule.save()
+    
+    return JsonResponse({'result': 'Title updated!'}, status=200)
+    
+    
