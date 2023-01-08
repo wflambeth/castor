@@ -31,7 +31,7 @@ class Schedule(models.Model):
         FALL = 3
 
     user = models.ForeignKey('User', on_delete=models.CASCADE)
-    name = models.CharField(max_length=100, default=f"{user.name}'s Schedule") # not enforcing uniqueness on this for now
+    name = models.CharField(max_length=100, default="My new schedule") # not enforcing uniqueness on this for now
     start_qtr = models.PositiveSmallIntegerField(choices=Quarter.choices)
     end_qtr = models.PositiveSmallIntegerField(choices=Quarter.choices)
     start_year = models.PositiveSmallIntegerField() 
