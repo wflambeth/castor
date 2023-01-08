@@ -33,9 +33,11 @@
                 {% endif %}
             </div>
             {% endfor %}
+            {% if sched_list|length < 10 %}
             <div class="schedules-item" id="create-sched">
                 <a href="{% url 'index' %}?create=True">Create New Schedule</a>
             </div>
+            {% endif %}
         </div>
 
         <div id="unscheduled">
