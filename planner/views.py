@@ -4,8 +4,10 @@ from django.shortcuts import HttpResponse, render, redirect
 from django.template import loader
 from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequest
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods, require_safe
 from planner.models import Course, Schedule, Course_Schedule, Prereq
 
+@require_safe
 def index(request):
     # Option 1: user is logged out; show 'demo' schedule
     if not request.user.is_authenticated:
@@ -36,6 +38,7 @@ def index(request):
     context['sched_list'] = sched_list
     return render(request, 'planner/index.html', context)
 
+@require_http_methods(["POST"])
 def save(request): 
     if not request.user.is_authenticated: #TODO: do I need this? better to just use the decorator?
         return HttpResponseForbidden('Not logged in')
@@ -86,6 +89,7 @@ def delete(request):
     return redirect('index')
 
 @login_required
+@require_http_methods(["POST"])
 def update_title(request):
     data = json.loads(request.body)
 
