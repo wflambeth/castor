@@ -86,7 +86,7 @@ def delete(request):
         return HttpResponseBadRequest('Schedule not found')
     
     schedule.delete()
-    return redirect('index')
+    return HttpResponse(status=204)
 
 @login_required
 @require_http_methods(["POST"])

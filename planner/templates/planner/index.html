@@ -25,11 +25,11 @@
         <div id="schedules-list">
             <h4>My schedules</h4>
             {% for sched in sched_list %}
-            <div class="schedules-item">
+            <div class="schedules-item" id="{{ sched.id }}_parent">
                 {% if sched.id == schedule.id %}
-                <span>{{ sched.name }}   <a class="delete-sched" href="{% url 'delete' %}?id={{ sched.id }}">[x]</a></span>
+                <span>{{ sched.name }}</span>
                 {% else %}
-                <span><a href="{% url 'index' %}?id={{ sched.id }}">{{ sched.name }}</a>   <a class="delete-sched" href="{% url 'delete' %}?id={{ sched.id }}">[x]</a></span>
+                <span><a href="{% url 'index' %}?id={{ sched.id }}">{{ sched.name }}</a>   <a data-delete-id="{{ sched.id }}" class="delete-sched" href="#">[x]</a></span>
                 {% endif %}
             </div>
             {% endfor %}
@@ -93,8 +93,11 @@
             {% if user.is_authenticated %}
             var page_sched_id = {{schedule.id}};
             var auth = true;
-            var save_path = "{% url 'save' %}"
-            var update_title_path = "{% url 'update_title' %}"
+            var paths = {
+                save: "{% url 'save' %}",
+                update_title: "{% url 'update_title' %}",
+                delete: "{% url 'delete' %}"
+            }
             {% else %}
             var page_sched_id = "";
             var auth = false;

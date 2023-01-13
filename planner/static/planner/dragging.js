@@ -25,7 +25,7 @@ function dropLogger(el, target, source, sibling) {
 if (auth) {
   function saveSchedule() {
     const request = new Request(
-      save_path,
+      paths.save,
       {headers: {
         'X-CSRFToken': csrftoken,
         'Content-Type': 'application/json',
@@ -55,7 +55,7 @@ if (auth) {
     }
 
     const request = new Request(
-      update_title_path,
+      paths.update_title,
       {headers: {
         'X-CSRFToken': csrftoken,
         'Content-Type': 'application/json',
@@ -100,6 +100,40 @@ if (auth) {
       editing = false;
       updateTitle(title.innerText);
     }
+  });
+
+  // DELETE handler for our buttons
+  // TODO: how to handle if someone wants to delete currently active schedule 
+  //    (disabled for now)
+  function delete_schedule(event) {
+    event.preventDefault();
+    const id = event.target.getAttribute('data-delete-id');
+    const req = new Request(
+      paths.delete + "?id=" + id,
+      {
+        headers: {
+          'X-CSRFToken': csrftoken,
+          'Content-Type': 'application/json'
+        },
+        method: 'DELETE'
+      });
+
+    fetch(req, {method: 'DELETE', mode:'same-origin'})
+      .then(function (response){
+        if (response.status === 204){
+          document.getElementById(id + '_parent').remove();
+          return 'Schedule ' + id + ' deleted';
+        } else {return Promise.reject(response);}
+      }).then(function(data){
+          console.log(data);
+      }).catch(function(err){
+        console.log(err);
+      });
+  }
+  
+  const delete_btns = Object.values(document.getElementsByClassName('delete-sched'));
+  delete_btns.forEach(btn => {
+    btn.addEventListener('click', delete_schedule);
   });
 }
 
