@@ -2,7 +2,7 @@
 from planner.models import Course, Schedule, Course_Schedule, Prereq
 from datetime import datetime
 
-def no_auth():
+def demo():
     """
     If user is not logged in, create an empty schedule with 4 terms covering the current year. 
     """
@@ -20,7 +20,7 @@ def no_auth():
 
     return context
 
-def schedule(schedule):
+def existing(schedule):
     sched_courses = Course_Schedule.objects.filter(schedule=schedule).order_by('course__course_number')
     unsched_courses = Course.objects.all().exclude(course_number__in=sched_courses.values('course'))
 
@@ -49,7 +49,7 @@ def schedule(schedule):
 
     return context
 
-def blank_schedule(user):
+def new(user):
     year = datetime.now().year
 
     schedule = Schedule (
