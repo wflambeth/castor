@@ -75,6 +75,7 @@ def save(request):
     return JsonResponse({'status': 'saved', 'schedule': schedule.id}, status=200)
 
 @login_required
+@require_http_methods(["DELETE"])
 def delete(request):
     id = request.GET.get('id')
     if not id:
