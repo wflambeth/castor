@@ -7,13 +7,11 @@ function saveSchedule() {
         {headers: {'X-CSRFToken': csrftoken,
                    'Content-Type': 'application/json'}, 
          body: JSON.stringify(POST_changes),
-         method: 'POST'
-        });
+         method: 'POST',
+         mode: 'same-origin'
+    });
     
-    fetch(request, {
-        method: 'POST',
-        mode: 'same-origin'
-    })
+    fetch(request)
     .then((response) => response.json())
     .then((data) => {
         console.log('Success: ', data);
@@ -36,13 +34,11 @@ function updateTitle(text) {
             'schedule': page_sched_id,
             'title': text
         }),
-        method: 'POST'
-        });
-
-    fetch(request, {
         method: 'POST',
         mode: 'same-origin'
-    })
+    });
+
+    fetch(request)
     .then((response) => response.json())
     .then((data) => {
         console.log('Success: ', data);
@@ -85,17 +81,16 @@ titleEditLink.addEventListener("click", (event) => {
 function delete_schedule(event) {
     event.preventDefault();
     const id = event.target.getAttribute('data-delete-id');
-    const req = new Request(
+    const request = new Request(
         paths.delete + "?id=" + id,
-        {
-            headers: {
-                'X-CSRFToken': csrftoken,
-                'Content-Type': 'application/json'
-            },
-            method: 'DELETE'
-        });
+        {headers: 
+            {'X-CSRFToken': csrftoken,
+             'Content-Type': 'application/json'},
+        method: 'DELETE',
+        mode: 'same-origin'
+    });
 
-    fetch(req, { method: 'DELETE', mode: 'same-origin' })
+    fetch(request)
         .then(function (response) {
             if (response.status === 204) {
                 document.getElementById(id + '_parent').remove();
