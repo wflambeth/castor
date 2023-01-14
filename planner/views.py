@@ -10,24 +10,24 @@ from planner.models import Course, Schedule, Course_Schedule, Prereq
 
 @require_safe
 def index(request):
-    # Option 1: user is logged out; show 'demo' schedule
+    # If user is logged out, show 'demo' schedule
     if not request.user.is_authenticated:
         return render(request, 'planner/index.html', sl.demo())
 
     sched_list = Schedule.objects.filter(user=request.user)
-    # Option 2: user is logged in and does not have any schedules;
-    # create new schedule and direct them there
+    # If user is logged in and has no schedules, create one
     if not sched_list.exists() and len(sched_list) < 10:
         return redirect('/create')
   
-    # Option 3: user is requesting an existing schedule
+    # If user requests existing schedule, return it
     id = request.GET.get('id')
     if id:
         try: 
             schedule = sched_list.get(id=id)
         except Schedule.DoesNotExist:
             schedule = sched_list[0]
-    # Option 4: user has schedules but did not request one. Show oldest schedule.
+    # If user did not request a specific schedule (or requested
+    # an invalid one), return oldest schedule
     else:
         schedule = sched_list[0]
     
