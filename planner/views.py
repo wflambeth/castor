@@ -61,7 +61,7 @@ def save(request):
     return JsonResponse({'status': 'saved', 'schedule': schedule.id}, status=200)
 
 @login_required
-@require_http_methods(["DELETE"])
+@require_http_methods(["GET", "DELETE"])
 def delete(request):
     id = request.GET.get('id')
     if not id:
@@ -73,7 +73,11 @@ def delete(request):
         return HttpResponseBadRequest('Schedule not found')
     
     schedule.delete()
-    return HttpResponse(status=204)
+    
+    if request.method == 'GET':
+        return redirect('/')
+    else:
+        return HttpResponse(status=204)
 
 @login_required
 @require_http_methods(["POST"])

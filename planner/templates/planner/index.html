@@ -31,7 +31,7 @@
             {% for sched in sched_list %}
             <div class="schedules-item" id="{{ sched.id }}_parent">
                 {% if sched.id == schedule.id %}
-                <span>{{ sched.name }}</span>
+                <span>{{ sched.name }} <a id="delete-current" href="{% url 'delete' %}?id={{ sched.id }}">[x]</a></span>
                 {% else %}
                 <span><a href="{% url 'index' %}?id={{ sched.id }}">{{ sched.name }}</a>   <a data-delete-id="{{ sched.id }}" class="delete-sched" href="#">[x]</a></span>
                 {% endif %}
