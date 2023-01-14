@@ -2,22 +2,23 @@
 
 function saveSchedule() {
     const request = new Request(
-    paths.save,
-    {headers: {
-        'X-CSRFToken': csrftoken,
-        'Content-Type': 'application/json',
-    },body: JSON.stringify(POST_changes),
-    method: 'POST'}
-    );
+        paths.save,
+        {headers: {'X-CSRFToken': csrftoken,
+                   'Content-Type': 'application/json'}, 
+         body: JSON.stringify(POST_changes),
+         method: 'POST'
+        });
+    
     fetch(request, {
-    method: 'POST', 
-    mode: 'same-origin'})
+        method: 'POST',
+        mode: 'same-origin'
+    })
     .then((response) => response.json())
     .then((data) => {
-    console.log('Success: ', data);
+        console.log('Success: ', data);
     })
     .catch((error) => {
-    console.log('Error:', error);
+        console.log('Error:', error);
     });
 }
 
@@ -25,29 +26,28 @@ let saveBtn = document.getElementById('submit-button');
 saveBtn.addEventListener("click", saveSchedule);
 
 function updateTitle(text) {
-
-    const title_POST_info = {
-    'schedule': page_sched_id,
-    'title': text
-    }
-
     const request = new Request(
-    paths.update_title,
-    {headers: {
-        'X-CSRFToken': csrftoken,
-        'Content-Type': 'application/json',
-    },body: JSON.stringify(title_POST_info),
-    method: 'POST'}
-    );
+        paths.update_title,
+        {headers: 
+            {'X-CSRFToken': csrftoken,
+             'Content-Type': 'application/json'}, 
+         body: JSON.stringify({
+            'schedule': page_sched_id,
+            'title': text
+        }),
+        method: 'POST'
+        });
+
     fetch(request, {
-    method: 'POST',
-    mode: 'same-origin'})
+        method: 'POST',
+        mode: 'same-origin'
+    })
     .then((response) => response.json())
     .then((data) => {
-    console.log('Success: ', data);
+        console.log('Success: ', data);
     })
     .catch((error) => {
-    console.log('Error:', error);
+        console.log('Error:', error);
     })
 };
 
@@ -57,25 +57,25 @@ let titleEditLink = document.getElementById('edit-title');
 titleEditLink.addEventListener("click", (event) => {
     event.preventDefault();
     if (editing === false) {
-    title.setAttribute('contentEditable', 'true');
-    title.focus();
+        title.setAttribute('contentEditable', 'true');
+        title.focus();
 
-    // Selects all text in the title, shoutout StackOverflow:
-    // https://stackoverflow.com/questions/6139107/programmatically-select-text-in-a-contenteditable-html-element
-    // TODO: this looks terrible, breaks header (could just use a popup instead)?
-    let range = document.createRange();
-    range.selectNodeContents(title);
-    let sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
+        // Selects all text in the title, shoutout StackOverflow:
+        // https://stackoverflow.com/questions/6139107/programmatically-select-text-in-a-contenteditable-html-element
+        // TODO: this looks terrible, breaks header (could just use a popup instead)?
+        let range = document.createRange();
+        range.selectNodeContents(title);
+        let sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
 
-    titleEditLink.textContent = '(save)'
-    editing = true;
+        titleEditLink.textContent = '(save)'
+        editing = true;
     } else {
-    title.setAttribute('contentEditable', 'false');
-    titleEditLink.textContent = '(edit)'
-    editing = false;
-    updateTitle(title.innerText);
+        title.setAttribute('contentEditable', 'false');
+        titleEditLink.textContent = '(edit)'
+        editing = false;
+        updateTitle(title.innerText);
     }
 });
 
@@ -86,26 +86,28 @@ function delete_schedule(event) {
     event.preventDefault();
     const id = event.target.getAttribute('data-delete-id');
     const req = new Request(
-    paths.delete + "?id=" + id,
-    {
-        headers: {
-        'X-CSRFToken': csrftoken,
-        'Content-Type': 'application/json'
-        },
-        method: 'DELETE'
-    });
+        paths.delete + "?id=" + id,
+        {
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json'
+            },
+            method: 'DELETE'
+        });
 
-    fetch(req, {method: 'DELETE', mode:'same-origin'})
-    .then(function (response){
-        if (response.status === 204){
-        document.getElementById(id + '_parent').remove();
-        return 'Schedule ' + id + ' deleted';
-        } else {return Promise.reject(response);}
-    }).then(function(data){
-        console.log(data);
-    }).catch(function(err){
-        console.log(err);
-    });
+    fetch(req, { method: 'DELETE', mode: 'same-origin' })
+        .then(function (response) {
+            if (response.status === 204) {
+                document.getElementById(id + '_parent').remove();
+                return 'Schedule ' + id + ' deleted';
+            } else { return Promise.reject(response); }
+        })
+        .then(function (msg) {
+            console.log(msg);
+        })
+        .catch(function (err) {
+            console.error(err);
+        });
 }
 
 const delete_btns = Object.values(document.getElementsByClassName('delete-sched'));
