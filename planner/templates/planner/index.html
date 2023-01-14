@@ -23,6 +23,7 @@
     </header>
     <section id="content" class="grid-wrapper">
         <div id="schedules-list">
+        {% if user.is_authenticated %}
             <h4>My schedules</h4>
             {% for sched in sched_list %}
             <div class="schedules-item" id="{{ sched.id }}_parent">
@@ -38,6 +39,7 @@
                 <a href="{% url 'create' %}">Create New Schedule</a>
             </div>
             {% endif %}
+        {% endif %}
         </div>
 
         <div id="unscheduled">
