@@ -47,11 +47,9 @@ def create(request):
     schedule.save()
     return redirect(f'/?id={schedule.id}')
 
+@login_required
 @require_http_methods(["POST"])
 def save(request): 
-    if not request.user.is_authenticated: #TODO: do I need this? better to just use the decorator?
-        return HttpResponseForbidden('Not logged in')
-    
     data = json.loads(request.body)
     try:
         schedule = Schedule.objects.filter(user=request.user).get(id=int(data['s']))
