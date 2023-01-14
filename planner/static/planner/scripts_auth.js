@@ -76,8 +76,7 @@ titleEditLink.addEventListener("click", (event) => {
     }
 });
 
-/* Delete existing schedules 
-   TODO: allow users to delete currently active schedule, redirect to homepage */
+/* Delete existing schedules */
 function delete_schedule(event) {
     event.preventDefault();
     const id = event.target.getAttribute('data-delete-id');
