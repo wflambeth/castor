@@ -6,7 +6,10 @@
     <link rel="stylesheet" href="{% static 'planner/dragula.css' %}">
     <script defer src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
     <script defer src="{% static 'planner/dragula.js' %}"></script>
-    <script defer src="{% static 'planner/dragging.js' %}"></script>
+    <script defer src="{% static 'planner/scripts_base.js' %}"></script>
+    {% if user.is_authenticated %} 
+    <script defer src="{% static 'planner/scripts_auth.js' %}"></script>
+    {% endif %}
 </head>
 
 <body>
@@ -94,7 +97,6 @@
         <script>
             {% if user.is_authenticated %}
             var page_sched_id = {{schedule.id}};
-            var auth = true;
             var paths = {
                 save: "{% url 'save' %}",
                 update_title: "{% url 'update_title' %}",
@@ -102,7 +104,6 @@
             }
             {% else %}
             var page_sched_id = "";
-            var auth = false;
             {% endif %}
         </script>
     </footer>
