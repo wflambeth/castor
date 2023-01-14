@@ -14,29 +14,38 @@ def index(request):
         return render(request, 'planner/index.html', sl.demo())
 
     sched_list = Schedule.objects.filter(user=request.user)
-    # Option 2: user is logged in and does not have any schedules
-    # Option 3: user is requesting to create a new schedule, and is under limit
-    if not sched_list.exists() or request.GET.get('create') and len(sched_list) < 10:
-        # in either case, create blank schedule and redirect user there
-        schedule = sl.new(request.user)
-        schedule.save()
-        return redirect(f'/?id={schedule.id}')
-        
-    # Option 4: user is requesting an existing schedule
+    # Option 2: user is logged in and does not have any schedules;
+    # create new schedule and direct them there
+    if not sched_list.exists() and len(sched_list) < 10:
+        return redirect('/create')
+  
+    # Option 3: user is requesting an existing schedule
     id = request.GET.get('id')
     if id:
         try: 
             schedule = sched_list.get(id=id)
         except Schedule.DoesNotExist:
             schedule = sched_list[0]
+    # Option 4: user has schedules but did not request one. Show oldest schedule.
     else:
-        # if no ID passed, return oldest one
         schedule = sched_list[0]
     
     context = sl.existing(schedule)
     context['user'] = request.user
     context['sched_list'] = sched_list
     return render(request, 'planner/index.html', context)
+
+@login_required
+@require_http_methods(["GET"])
+def create(request):
+    sched_list = Schedule.objects.filter(user=request.user)
+    # TODO: error messaging around the number of schedules one can create
+    if len(sched_list) > 9:
+        return redirect('/')
+    
+    schedule = sl.new(request.user)
+    schedule.save()
+    return redirect(f'/?id={schedule.id}')
 
 @require_http_methods(["POST"])
 def save(request): 
