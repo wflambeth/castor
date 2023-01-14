@@ -1,5 +1,6 @@
 "use strict";
 
+/* Save scheduled course updates as logged by dropLogger function (in scripts_base.js) */
 function saveSchedule() {
     const request = new Request(
         paths.save,
@@ -21,10 +22,10 @@ function saveSchedule() {
         console.log('Error:', error);
     });
 }
-
 let saveBtn = document.getElementById('submit-button');
 saveBtn.addEventListener("click", saveSchedule);
 
+/* Edit and save schedule titles */
 function updateTitle(text) {
     const request = new Request(
         paths.update_title,
@@ -79,9 +80,8 @@ titleEditLink.addEventListener("click", (event) => {
     }
 });
 
-// DELETE handler for our buttons
-// TODO: how to handle if someone wants to delete currently active schedule 
-//    (disabled for now)
+/* Delete existing schedules 
+   TODO: allow users to delete currently active schedule, redirect to homepage */
 function delete_schedule(event) {
     event.preventDefault();
     const id = event.target.getAttribute('data-delete-id');
@@ -109,10 +109,10 @@ function delete_schedule(event) {
             console.error(err);
         });
 }
-
 const delete_btns = Object.values(document.getElementsByClassName('delete-sched'));
 delete_btns.forEach(btn => {
     btn.addEventListener('click', delete_schedule);
 });
 
+/* CSRF token for fetch authentication */
 const csrftoken = Cookies.get('csrftoken');
