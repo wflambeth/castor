@@ -26,9 +26,18 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ['SECRET_KEY']
 
-DEBUG = True
+DEBUG = bool(os.environ['DEBUG'])
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    str(os.environ['ALLOWED_HOSTS'])
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    str(os.environ['CSRF_TRUSTED_ORIGINS'])
+]
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 
 # Application definition
