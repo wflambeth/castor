@@ -14,18 +14,18 @@ from pathlib import Path
 import os, dj_database_url
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv('.env')
+ENV = os.environ['ENV']
+if ENV == 'PROD':
+    load_dotenv('.env.prod')
+elif ENV == 'DEV':
+    load_dotenv('.env.dev')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
-
 SECRET_KEY = os.environ['SECRET_KEY']
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = []
@@ -89,8 +89,11 @@ SITE_ID = 1
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+DATABASE_URL = os.environ['DATABASE_URL']
+
 DATABASES = {
-    "default": dj_database_url.parse(os.environ.get('DATABASE_URL'), conn_max_age=600)
+    "default": dj_database_url.parse(DATABASE_URL, 
+                                     conn_max_age=600),
 }
 
 
