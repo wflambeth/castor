@@ -15,7 +15,7 @@
 <body>
     <header>
     {% if user.is_authenticated %}
-        <!--<span><h1 id="sched-name">{{ schedule.name }}</h1><a href="#" id="edit-title">(edit)</a></span>-->
+        <span><h1 id="sched-name">{{ schedule.name }}</h1><!--<a href="#" id="edit-title">(edit)</a></span>-->
         <p>{{ user.username }}</p>
         <a href="{% url 'account_logout' %}">(log out)</a>
         <button id="submit-button">Save Schedule</button>
