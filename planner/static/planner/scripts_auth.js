@@ -23,7 +23,7 @@ function saveSchedule() {
 let saveBtn = document.getElementById('submit-button');
 saveBtn.addEventListener("click", saveSchedule);
 
-/* Edit and save schedule titles */
+/* Edit and save schedule titles
 function updateTitle(text) {
     const request = new Request(
         paths.update_title,
@@ -75,7 +75,7 @@ titleEditLink.addEventListener("click", (event) => {
         updateTitle(title.innerText);
     }
 });
-
+ */
 /* Delete existing schedules */
 function delete_schedule(event) {
     event.preventDefault();
