@@ -108,13 +108,13 @@ delete_btns.forEach(btn => {
     btn.addEventListener('click', delete_schedule);
 });
 
+/* Expand existing schedules by semester */
 const qtr_map = {
     '0' : 'Winter',
     '1' : 'Spring',
     '2' : 'Summer', 
     '3' : 'Fall'
 }
-
 const add_qtr_before = document.getElementById('add_qtr_before');
 const add_qtr_after = document.getElementById('add_qtr_after');
 let schedule_wrapper = document.getElementById('schedule-wrapper');
@@ -170,7 +170,9 @@ add_qtr_before.addEventListener("click", (event) => {
     let newtop = new_quarter(yr, qtr);
     schedule_wrapper.insertBefore(newtop, topnode);
 
-    // TODO: use this space to modify data POSTed to server
+    POST_changes.dates.start.year = yr;
+    POST_changes.dates.start.qtr = qtr;
+    console.log(POST_changes);
 });
 
 add_qtr_after.addEventListener("click", (event) => {
@@ -186,8 +188,10 @@ add_qtr_after.addEventListener("click", (event) => {
     }
     let newbottom = new_quarter(yr, qtr);
     schedule_wrapper.insertBefore(newbottom, bottomnode.nextSibling);
-});
 
+    POST_changes.dates.end.year = yr;
+    POST_changes.dates.end.qtr = qtr;
+});
 
 /* CSRF token for fetch authentication */
 const csrftoken = Cookies.get('csrftoken');

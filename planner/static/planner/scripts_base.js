@@ -17,5 +17,3 @@ function dropLogger(el, target, source, sibling) {
     POST_changes.courses[id] = { year, qtr };
   }
 }
-
-const POST_changes = { s: page_sched_id, courses: {} };

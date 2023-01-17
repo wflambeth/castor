@@ -57,7 +57,7 @@ def save(request):
     except Schedule.DoesNotExist:
         return HttpResponseBadRequest('Schedule not found')
     
-    su.update(schedule, data['courses'])
+    su.update(schedule, data['courses'], data['dates'])
     return JsonResponse({'status': 'saved', 'schedule': schedule.id}, status=200)
 
 @login_required

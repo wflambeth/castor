@@ -113,6 +113,20 @@
             {% else %}
             var page_sched_id = "";
             {% endif %}
+            const POST_changes = { 
+                s: page_sched_id, 
+                courses: {}, 
+                dates: {
+                    start: {
+                        qtr: {{ schedule.start_qtr }},
+                        year: {{ schedule.start_year }}
+                    },
+                    end: {
+                        qtr: {{ schedule.end_qtr }},
+                        year: {{ schedule.end_year }}
+                    },
+                }
+              };
         </script>
     </footer>
 </body>

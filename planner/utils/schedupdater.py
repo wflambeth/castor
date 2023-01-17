@@ -1,6 +1,14 @@
 from planner.models import Course, Course_Schedule
 
-def update(schedule, courses):
+def update(schedule, courses, dates):
+    print(dates)
+
+    schedule.start_year = dates['start']['year']
+    schedule.start_qtr = dates['start']['qtr']
+    schedule.end_year = dates['end']['year']
+    schedule.end_qtr = dates['end']['qtr']
+    schedule.save()
+
     for crs_num, term in courses.items():
         course = Course.objects.get(course_number=int(crs_num))
 
