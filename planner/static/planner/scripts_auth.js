@@ -120,7 +120,6 @@ const add_qtr_after = document.getElementById('add_qtr_after');
 let schedule_wrapper = document.getElementById('schedule-wrapper');
 let qtr_nodes = schedule_wrapper.childNodes;
 
-// TODO: make an empty node here, that we can just make copies of as needed
 function new_quarter(yr, qtr) {
     let parent = document.createElement('div');
     parent.setAttribute('class', 'qtr grid');
