@@ -141,7 +141,7 @@ function new_quarter(yr, qtr) {
     placeholder.setAttribute('class', 'course-item empty-item');
     let empty_title = document.createElement('span');
     empty_title.setAttribute('class', 'empty-title course-title');
-    empty_title.innerHTML = 'temp placeholder: empty term';
+    empty_title.innerHTML = 'placeholder: empty term';
     placeholder.appendChild(empty_title);
 
     parent.appendChild(title);
