@@ -23,7 +23,7 @@
             {% else %}
             <h1>Welcome to C.A.S.T.O.R.</h1>
             <p>This is a demo page only; please first <a href="{% url 'account_login' %}">Log In</a> or <a
-                    href="{% url 'account_signup' %}">Sign Up</a> if you'd like to save your schedule.</p>
+                    href="{% url 'account_signup' %}">Sign Up</a> if you'd like to customize the time frame and save your schedule.</p>
             {% endif %}
     </header>
     <section id="content" class="grid-wrapper">
@@ -104,15 +104,12 @@
     <footer>
         <script>
             {% if user.is_authenticated %}
-            var page_sched_id = {{ schedule.id }};
-            var paths = {
+            const page_sched_id = {{ schedule.id }};
+            const paths = {
                 save: "{% url 'save' %}",
                 update_title: "{% url 'update_title' %}",
                 delete: "{% url 'delete' %}"
             }
-            {% else %}
-            var page_sched_id = "";
-            {% endif %}
             const POST_changes = { 
                 s: page_sched_id, 
                 courses: {}, 
@@ -127,6 +124,22 @@
                     },
                 }
               };
+            {% else %}
+            const POST_changes = {
+                s: 'NULL',
+                courses: {},
+                dates: {
+                    start: {
+                        qtr: 0,
+                        year: 0
+                    },
+                    end: {
+                        qtr: 0, 
+                        year: 0
+                    }
+                }
+            };
+            {% endif %}
         </script>
     </footer>
 </body>
