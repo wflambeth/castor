@@ -12,13 +12,13 @@ function saveSchedule() {
     });
     
     fetch(request)
-    .then((response) => response.json())
-    .then((data) => {
-        console.log('Success: ', data);
-    })
-    .catch((error) => {
-        console.log('Error:', error);
-    });
+        .then((response) => response.json())
+        .then((data) => {
+            console.log('Success: ', data);
+        })
+        .catch((error) => {
+            console.log('Error:', error);
+        });
 }
 let saveBtn = document.getElementById('submit-button');
 saveBtn.addEventListener("click", saveSchedule);
@@ -110,15 +110,15 @@ delete_btns.forEach(btn => {
 
 /* Expand existing schedules by semester */
 const qtr_map = {
-    '0' : 'Winter',
-    '1' : 'Spring',
-    '2' : 'Summer', 
-    '3' : 'Fall'
+    '0': 'Winter',
+    '1': 'Spring',
+    '2': 'Summer',
+    '3': 'Fall'
 }
 const add_qtr_before = document.getElementById('add_qtr_before');
 const add_qtr_after = document.getElementById('add_qtr_after');
 let schedule_wrapper = document.getElementById('schedule-wrapper');
-let qtr_nodes = schedule_wrapper.childNodes;
+let qtr_nodes = schedule_wrapper.children;
 
 function new_quarter(yr, qtr) {
     let parent = document.createElement('div');
@@ -129,8 +129,15 @@ function new_quarter(yr, qtr) {
 
     let title = document.createElement('div');
     title.setAttribute('class', 'term-title');
-    title.innerHTML = qtr_map[qtr] + ' ' + yr;
-
+    title.innerHTML = qtr_map[qtr] + ' ' + yr + ' ';
+    let delete_link = document.createElement('a');
+    delete_link.setAttribute('href', '#');
+    delete_link.setAttribute('class', 'delete-term');
+    delete_link.setAttribute('data-delete-yr', yr);
+    delete_link.setAttribute('data-delete-qtr', qtr);
+    delete_link.innerText = "[x]";
+    delete_link.addEventListener('click', update_qtrs);
+    
     let container = document.createElement('div');
     container.setAttribute('class', 'course-container');
     //TODO: Can I remove these two from child div now that they're in parent? 
@@ -144,6 +151,7 @@ function new_quarter(yr, qtr) {
     empty_title.innerHTML = 'placeholder: empty term';
     placeholder.appendChild(empty_title);
 
+    title.appendChild(delete_link);
     parent.appendChild(title);
     parent.appendChild(container);
     container.appendChild(placeholder);
@@ -153,7 +161,7 @@ function new_quarter(yr, qtr) {
 
 add_qtr_before.addEventListener("click", (event) => {
     // qtr_nodes declared above; live list of children of sched wrapper
-    let topnode = qtr_nodes[3];
+    let topnode = qtr_nodes[1];
     let yr = topnode.getAttribute('data-yr');
     let qtr = topnode.getAttribute('data-qtr');
 
@@ -167,6 +175,7 @@ add_qtr_before.addEventListener("click", (event) => {
 
     // create new node and append at proper place
     let newtop = new_quarter(yr, qtr);
+    topnode.children[0].children[0].hidden = true;
     schedule_wrapper.insertBefore(newtop, topnode);
 
     POST_changes.dates.start.year = yr;
@@ -175,17 +184,18 @@ add_qtr_before.addEventListener("click", (event) => {
 });
 
 add_qtr_after.addEventListener("click", (event) => {
-    let bottomnode = qtr_nodes[(qtr_nodes.length - 4)];
+    let bottomnode = qtr_nodes[(qtr_nodes.length - 2)];
     let yr = +bottomnode.getAttribute('data-yr');
     let qtr = +bottomnode.getAttribute('data-qtr');
 
-    if (qtr > 2){
+    if (qtr > 2) {
         qtr = 0;
         yr = (yr + 1).toString();
     } else {
         qtr = (qtr + 1).toString();
     }
     let newbottom = new_quarter(yr, qtr);
+    bottomnode.children[0].children[0].hidden = true;
     schedule_wrapper.insertBefore(newbottom, bottomnode.nextSibling);
 
     POST_changes.dates.end.year = yr;
@@ -194,3 +204,36 @@ add_qtr_after.addEventListener("click", (event) => {
 
 /* CSRF token for fetch authentication */
 const csrftoken = Cookies.get('csrftoken');
+
+//unhide delete btn for nodes with classes and first/last in list
+// TODO: why am I using window.onload here, better way to structure this? 
+window.onload = (event) => {
+    // Reveal delete button for first/last
+    let qtr_deletes = [qtr_nodes[1].children[0].children[0], qtr_nodes[(qtr_nodes.length - 2)].children[0].children[0]];
+    
+    for (var item of qtr_deletes) {
+        item.hidden = false;
+        item.addEventListener('click', update_qtrs);
+    }
+}
+
+function update_qtrs (event) {
+    event.preventDefault();
+    event.target.parentNode.parentNode.remove();
+    // get first and last from qtr_nodes
+    let first = qtr_nodes[1];
+    let last = qtr_nodes[qtr_nodes.length - 2];
+
+    // set their [x]es visible
+    first.children[0].children[0].hidden = false;
+    first.children[0].children[0].addEventListener('click', update_qtrs);
+    last.children[0].children[0].hidden = false;
+    last.children[0].children[0].addEventListener('click', update_qtrs);
+
+    // update POST_changes with needed info
+    POST_changes.dates.start.year = first.getAttribute('data-yr');
+    POST_changes.dates.start.qtr = first.getAttribute('data-qtr');
+
+    POST_changes.dates.end.year = last.getAttribute('data-yr');
+    POST_changes.dates.end.qtr = last.getAttribute('data-qtr');
+}

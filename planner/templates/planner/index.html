@@ -78,7 +78,7 @@
                             {% elif term.1 == 2 %}Summer
                             {% elif term.1 == 3 %}Fall
                             {% endif %}{{term.0}}
-                            <a href="#" class="delete-term" hidden data-delete-yr="{{ term.0 }}" data-delete-qtr="{{ term.1 }}">[x]</a>
+                            <a href="#" hidden class="delete-term" data-delete-yr="{{ term.0 }}" data-delete-qtr="{{ term.1 }}">[x]</a>
                         </div>
                         <div class="course-container" data-yr="{{ term.0 }}" data-qtr="{{ term.1 }}">
                             {% if courses|length > 0 %}
