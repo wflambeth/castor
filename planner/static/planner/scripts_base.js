@@ -3,6 +3,9 @@
 var drake = dragula({
   isContainer: function (el) {
     return el.classList.contains('course-container');
+  },
+  moves: function (el) {
+    return (!el.classList.contains('empty-item'));
   }
 });
 
