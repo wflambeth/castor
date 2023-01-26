@@ -59,3 +59,8 @@ header h1,p {
 #create-sched {
     padding-top: 1em;
 }
+
+.delete-term {
+    z-index: 100;
+    position: relative;
+}

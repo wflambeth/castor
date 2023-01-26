@@ -212,11 +212,8 @@ const csrftoken = Cookies.get('csrftoken');
 // hide delete button 
 // TODO: why am I using window.onload here, better way to structure this? 
 window.onload = (event) => {    
-    // add event listeners and hide unneeded qtr-delete buttons
+    // add event listeners 
     for (var i = 1; i < qtr_nodes.length - 1; ++i) {
-        if (qtr_nodes[i].children[1].children[0].classList.contains('placeholder')) {
-            qtr_nodes[i].children[0].children[0].hidden = true;
-        }
         qtr_nodes[i].children[0].children[0].addEventListener('click', update_qtrs);
     }
     // ensure first & last qtrs are deletable
