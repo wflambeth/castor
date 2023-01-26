@@ -258,8 +258,10 @@ function update_qtrs (event) {
             } else {
                 elec_container.insertBefore(crs, elec_container.children[0]);
             }
-            // update changes to be sent to server
-            POST_changes.courses[crs.getAttribute('data-id')] = {year: null, qtr: null};
+            // update changes to be saved and index for dragging validation
+            let crs_id = crs.getAttribute('data-id');
+            POST_changes.courses[crs_id] = {year: null, qtr: null};
+            crs_idx[crs_id] = -1;
         }
         let placeholder = new_placeholder();
         course_container.append(placeholder);
@@ -280,4 +282,15 @@ function new_placeholder() {
     placeholder.appendChild(empty_title);
 
     return placeholder
+}
+
+/* Set initial indices of crs_idx (for drag validation logic) */
+const starting_nodes = Array.from(qtr_nodes);
+for (var i = 1; i < starting_nodes.length - 1; ++i) {
+    let nodes = starting_nodes[i].children[1].children;
+    for (var node of nodes) {
+        if (node.classList.contains('course')) {
+            crs_idx[node.getAttribute('data-id')] = i;
+        }
+    }
 }
