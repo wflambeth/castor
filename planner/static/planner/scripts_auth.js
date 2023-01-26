@@ -149,10 +149,10 @@ function new_quarter(yr, qtr) {
     container.setAttribute('data-qtr', qtr);
 
     let placeholder = document.createElement('div');
-    placeholder.setAttribute('class', 'course-item empty-item placeholder');
+    placeholder.setAttribute('class', 'course-item placeholder');
     let empty_title = document.createElement('span');
     empty_title.setAttribute('class', 'empty-title course-title');
-    empty_title.innerHTML = 'placeholder: empty term';
+    empty_title.innerHTML = '(empty term)';
     placeholder.appendChild(empty_title);
 
     title.appendChild(delete_link);
@@ -275,10 +275,10 @@ function update_qtrs (event) {
 
 function new_placeholder() {
     let placeholder = document.createElement('div');
-    placeholder.setAttribute('class', 'course-item empty-item placeholder');
+    placeholder.setAttribute('class', 'course-item placeholder');
     let empty_title = document.createElement('span');
     empty_title.setAttribute('class', 'empty-title course-title');
-    empty_title.innerHTML = 'placeholder: empty term';
+    empty_title.innerHTML = '(empty term)';
     placeholder.appendChild(empty_title);
 
     return placeholder

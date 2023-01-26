@@ -5,7 +5,7 @@ var drake = dragula({
     return el.classList.contains('course-container');
   },
   moves: function (el) {
-    return (!el.classList.contains('empty-item'));
+    return (!el.classList.contains('placeholder'));
   },
   accepts: function (el, target, source, sibling) {
     if (POST_changes['s'] !== 'NULL') { // TODO: Hack to avoid issues with logged-out demo page; remove
@@ -50,7 +50,7 @@ function dropLogger(el, target, source, sibling) {
     POST_changes.courses[id] = { year, qtr };
 
     // Remove placeholder from newly-nonempty container
-    let placeholder = target.getElementsByClassName('empty-item')[0];
+    let placeholder = target.getElementsByClassName('placeholder')[0];
     if (placeholder != undefined) {
       placeholder.remove();
       // check for existence of qtr-delete node, and enable if exists
@@ -65,10 +65,10 @@ function dropLogger(el, target, source, sibling) {
       // check if a spare placeholder is handy, use it if so
       if (placeholder === undefined) {
         placeholder = document.createElement('div');
-        placeholder.setAttribute('class', 'course-item empty-item placeholder');
+        placeholder.setAttribute('class', 'course-item placeholder');
         let empty_title = document.createElement('span');
         empty_title.setAttribute('class', 'empty-title course-title');
-        empty_title.innerHTML = 'placeholder: empty term';
+        empty_title.innerHTML = '(empty term)';
         placeholder.appendChild(empty_title);
       }
       source.appendChild(placeholder);

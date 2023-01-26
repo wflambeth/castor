@@ -36,7 +36,7 @@ header h1,p {
     border: 2px blue solid;
 }
 
-.empty-item {
+.placeholder {
     border: 2px grey dotted;
     background-color: aliceblue;
 }
