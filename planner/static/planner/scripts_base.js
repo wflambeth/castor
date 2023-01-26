@@ -6,7 +6,37 @@ var drake = dragula({
   },
   moves: function (el) {
     return (!el.classList.contains('empty-item'));
-  }
+  },
+  accepts: function (el, target, source, sibling) {
+    if (POST_changes['s'] !== 'NULL') { // TODO: Hack to avoid issues with logged-out demo page; remove
+      // course containers always accept their children back to them
+      let target_id = target.getAttribute('id');
+      let required = el.getAttribute('data-req') === 'true' ? true : false;
+      if (target_id === "req-container") {
+        return required;
+      }
+      else if (target_id === "elec-container") {
+        return (!required);
+      }
+      // check that item can be dropped in a given quarter - return false if it cannot
+      let item_id = +el.getAttribute('data-id');
+      let target_qtr = +target.parentNode.getAttribute('data-qtr');
+      if (quarters[item_id].indexOf(target_qtr) === -1) {
+        return false;
+      }
+      // check that all prereqs are in place
+      let target_index = Array.from(qtr_nodes).indexOf(target.parentNode);
+      for (var prq of prereqs[item_id]) {
+        console.log(crs_idx[prq]);
+        // if any are unplaced or placed equal to/after target, return false
+        if (crs_idx[prq] === -1 || crs_idx[prq] >= target_index) {
+          return false;
+        }
+      }
+    }
+    // otherwise, all looks good! 
+    return true;
+  },
 });
 
 drake.on('drop', dropLogger);
@@ -31,9 +61,9 @@ function dropLogger(el, target, source, sibling) {
 
     // add placeholder to newly-empty container
     // TODO: replace with function defined in scripts_auth.js
-    if (source.getElementsByClassName('course-item').length === 0){
+    if (source.getElementsByClassName('course-item').length === 0) {
       // check if a spare placeholder is handy, use it if so
-      if (placeholder === undefined){
+      if (placeholder === undefined) {
         placeholder = document.createElement('div');
         placeholder.setAttribute('class', 'course-item empty-item placeholder');
         let empty_title = document.createElement('span');
