@@ -14,6 +14,10 @@ function saveSchedule() {
     fetch(request)
         .then((response) => response.json())
         .then((data) => {
+            // clear save object
+            POST_changes.courses = {};
+            POST_changes.dates.start = {qtr: null, year: null};
+            POST_changes.dates.end = {qtr: null, year: null};
             console.log('Success: ', data);
         })
         .catch((error) => {
