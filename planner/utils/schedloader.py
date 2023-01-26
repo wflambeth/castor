@@ -23,6 +23,7 @@ def demo():
 def existing(schedule):
     sched_courses = Course_Schedule.objects.filter(schedule=schedule).order_by('course__course_number')
     unsched_courses = Course.objects.all().exclude(course_number__in=sched_courses.values('course'))
+    prereqs, quarters = make_prereqs_qtrs()
 
     sched_qtrs = {}
     qtr = schedule.start_qtr
@@ -44,7 +45,9 @@ def existing(schedule):
         "schedule": schedule,
         "unsched_req": unsched_courses.filter(required=True),
         "unsched_elec": unsched_courses.filter(required=False),
-        "sched_qtrs": sched_qtrs
+        "sched_qtrs": sched_qtrs,
+        "prereqs": prereqs,
+        "quarters": quarters
     }
 
     return context
@@ -62,3 +65,11 @@ def new(user):
 
     return schedule
 
+def make_prereqs_qtrs():
+    prereqs = {}
+    quarters = {}
+    for course in Course.objects.all():
+        prereqs[course.course_number] = [prereq.prereq.course_number for prereq in Prereq.objects.filter(course=course)]
+        quarters[course.course_number] = course.qtrs
+
+    return prereqs, quarters
