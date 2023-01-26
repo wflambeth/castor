@@ -253,15 +253,16 @@ function update_qtrs (event) {
         const req_container = document.getElementById('req-container');
         const elec_container = document.getElementById('elec-container');
 
-        for (var crs of course_container.children) {
-            let id = parseInt(crs.getAttribute('data-id'));
-            if (requirements.includes(id)){
+        while (course_container.children.length > 0) {
+            let crs = course_container.children[0];
+            // move scheduled course to appropriate container
+            if (crs.getAttribute('data-req') === 'true'){
                 req_container.insertBefore(crs, req_container.children[0]);
             } else {
                 elec_container.insertBefore(crs, elec_container.children[0]);
             }
             // update changes to be sent to server
-            POST_changes.courses[id] = {year: null, qtr: null};
+            POST_changes.courses[crs.getAttribute('data-id')] = {year: null, qtr: null};
         }
         let placeholder = new_placeholder();
         course_container.append(placeholder);

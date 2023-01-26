@@ -51,7 +51,7 @@
             <h2>Required Courses</h2>
             <div class="course-container" id="req-container">
                 {% for course in unsched_req %}
-                <div class="course-item" data-id="{{course.course_number}}">
+                <div class="course-item" data-id="{{course.course_number}}" data-qtrs="{{course.qtrs}}" data-req="true">
                     <span class="course-title">{{ course }}</span>
                 </div>
                 {% endfor %}
@@ -59,7 +59,7 @@
             <h2>Electives</h2>
             <div class="course-container" id="elec-container">
                 {% for course in unsched_elec%}
-                <div class="course-item" data-id="{{course.course_number}}">
+                <div class="course-item" data-id="{{course.course_number}}" data-qtrs="{{course.qtrs}}" data-req="false">
                     <span class="course-title">{{ course }}</span>
                 </div>
                 {% endfor %}
@@ -85,7 +85,9 @@
                         <div class="course-container" data-yr="{{ term.0 }}" data-qtr="{{ term.1 }}">
                             {% if courses|length > 0 %}
                             {% for course in courses %}
-                            <div class="course-item" data-id="{{course.course.course_number}}">
+                            <div class="course-item" data-id="{{course.course.course_number}}"
+                            data-req="{% if course.course.required %}true{% else %}false{% endif %}"
+                            data-qtrs="{{course.course.qtrs}}">
                                 <span class="course-title">{{ course.course }}</span>
                             </div>
                             {% endfor %}
