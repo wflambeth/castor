@@ -145,7 +145,7 @@ function new_quarter(yr, qtr) {
     container.setAttribute('data-qtr', qtr);
 
     let placeholder = document.createElement('div');
-    placeholder.setAttribute('class', 'course-item empty-item');
+    placeholder.setAttribute('class', 'course-item empty-item placeholder');
     let empty_title = document.createElement('span');
     empty_title.setAttribute('class', 'empty-title course-title');
     empty_title.innerHTML = 'placeholder: empty term';
@@ -205,35 +205,77 @@ add_qtr_after.addEventListener("click", (event) => {
 /* CSRF token for fetch authentication */
 const csrftoken = Cookies.get('csrftoken');
 
-//unhide delete btn for nodes with classes and first/last in list
+// hide delete button 
 // TODO: why am I using window.onload here, better way to structure this? 
-window.onload = (event) => {
-    // Reveal delete button for first/last
-    let qtr_deletes = [qtr_nodes[1].children[0].children[0], qtr_nodes[(qtr_nodes.length - 2)].children[0].children[0]];
-    
-    for (var item of qtr_deletes) {
-        item.hidden = false;
-        item.addEventListener('click', update_qtrs);
+window.onload = (event) => {    
+    // add event listeners and hide unneeded qtr-delete buttons
+    for (var i = 1; i < qtr_nodes.length - 1; ++i) {
+        if (qtr_nodes[i].children[1].children[0].classList.contains('placeholder')) {
+            qtr_nodes[i].children[0].children[0].hidden = true;
+        }
+        qtr_nodes[i].children[0].children[0].addEventListener('click', update_qtrs);
     }
+    // ensure first & last qtrs are deletable
+    qtr_nodes[1].children[0].children[0].hidden = false;
+    qtr_nodes[qtr_nodes.length - 2].children[0].children[0].hidden = false;
 }
 
 function update_qtrs (event) {
     event.preventDefault();
-    event.target.parentNode.parentNode.remove();
-    // get first and last from qtr_nodes
-    let first = qtr_nodes[1];
-    let last = qtr_nodes[qtr_nodes.length - 2];
+    // get course container
+    const course_container = event.target.parentNode.nextElementSibling;
+    if (course_container.children[0].classList.contains('placeholder')) {
+        // wipe empty node off the face of the earth
+        
+        event.target.parentNode.parentNode.remove();
+        // get first and last from qtr_nodes
+        let first = qtr_nodes[1];
+        let last = qtr_nodes[qtr_nodes.length - 2];
 
-    // set their [x]es visible
-    first.children[0].children[0].hidden = false;
-    first.children[0].children[0].addEventListener('click', update_qtrs);
-    last.children[0].children[0].hidden = false;
-    last.children[0].children[0].addEventListener('click', update_qtrs);
+        // set their [x]es visible
+        first.children[0].children[0].hidden = false;
+        first.children[0].children[0].addEventListener('click', update_qtrs);
+        last.children[0].children[0].hidden = false;
+        last.children[0].children[0].addEventListener('click', update_qtrs);
 
-    // update POST_changes with needed info
-    POST_changes.dates.start.year = first.getAttribute('data-yr');
-    POST_changes.dates.start.qtr = first.getAttribute('data-qtr');
+        // update POST_changes with needed info
+        POST_changes.dates.start.year = first.getAttribute('data-yr');
+        POST_changes.dates.start.qtr = first.getAttribute('data-qtr');
 
-    POST_changes.dates.end.year = last.getAttribute('data-yr');
-    POST_changes.dates.end.qtr = last.getAttribute('data-qtr');
+        POST_changes.dates.end.year = last.getAttribute('data-yr');
+        POST_changes.dates.end.qtr = last.getAttribute('data-qtr');
+    } else {
+        // remove existing classes from non-empty node
+        const req_container = document.getElementById('req-container');
+        const elec_container = document.getElementById('elec-container');
+
+        for (var crs of course_container.children) {
+            let id = parseInt(crs.getAttribute('data-id'));
+            if (requirements.includes(id)){
+                req_container.insertBefore(crs, req_container.children[0]);
+            } else {
+                elec_container.insertBefore(crs, elec_container.children[0]);
+            }
+            // update changes to be sent to server
+            POST_changes.courses[id] = {year: null, qtr: null};
+        }
+        let placeholder = new_placeholder();
+        course_container.append(placeholder);
+        // check if qtr is first/last in list, and hide the x if not
+        if (!(course_container.parentNode === qtr_nodes[1]) && 
+            !(course_container.parentNode === qtr_nodes[qtr_nodes.length - 2])){
+                event.target.hidden = true;
+            }
+    }
+}
+
+function new_placeholder() {
+    let placeholder = document.createElement('div');
+    placeholder.setAttribute('class', 'course-item empty-item placeholder');
+    let empty_title = document.createElement('span');
+    empty_title.setAttribute('class', 'empty-title course-title');
+    empty_title.innerHTML = 'placeholder: empty term';
+    placeholder.appendChild(empty_title);
+
+    return placeholder
 }

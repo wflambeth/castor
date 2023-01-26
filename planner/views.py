@@ -34,6 +34,7 @@ def index(request):
     context = sl.existing(schedule)
     context['user'] = request.user
     context['sched_list'] = sched_list
+    context['requirements'] = [ course.course_number for course in Course.objects.filter(required=True)] 
     return render(request, 'planner/index.html', context)
 
 @login_required
