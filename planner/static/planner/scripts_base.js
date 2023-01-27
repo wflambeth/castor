@@ -64,12 +64,7 @@ function dropLogger(el, target, source, sibling) {
     if (source.getElementsByClassName('course-item').length === 0) {
       // check if a spare placeholder is handy, use it if so
       if (placeholder === undefined) {
-        placeholder = document.createElement('div');
-        placeholder.setAttribute('class', 'course-item placeholder');
-        let empty_title = document.createElement('span');
-        empty_title.setAttribute('class', 'empty-title course-title');
-        empty_title.innerHTML = '(empty term)';
-        placeholder.appendChild(empty_title);
+        placeholder = new_placeholder();
       }
       source.appendChild(placeholder);
     }
