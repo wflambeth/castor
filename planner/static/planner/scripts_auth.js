@@ -185,8 +185,15 @@ document.getElementById('add_qtr_before').addEventListener("click", (event) => {
 
     // create new node and append at proper place
     let newtop = new_quarter(yr, qtr);
-    topnode.children[0].children[0].hidden = true;
     schedule_wrapper.insertBefore(newtop, topnode);
+    
+    // Ensure [x]es are revealed/hidden appropriately on former edge
+    // (Hidden if node is not on end, and is empty)
+    if (qtr_nodes.length > 4 && (topnode.children[1].children[0].classList.contains('placeholder'))) {
+        topnode.children[0].children[0].hidden = true;
+    } else if (qtr_nodes.length === 4) { // allow deletion of bottom node if top node has been added
+        qtr_nodes[2].children[0].children[0].hidden = false;
+    }
 
     // Update schedule bounds to be saved to DB
     POST_changes.dates.start.year = yr;
@@ -216,8 +223,16 @@ document.getElementById('add_qtr_after').addEventListener("click", (event) => {
     }
     // create new node and append at proper place
     let newbottom = new_quarter(yr, qtr);
-    bottomnode.children[0].children[0].hidden = true;
     schedule_wrapper.insertBefore(newbottom, bottomnode.nextSibling);
+
+    // Ensure [x]es are revealed/hidden appropriately on former edge
+    // (Hidden if node is not on end, and is empty)
+    if (qtr_nodes.length > 4 && (bottomnode.children[1].children[0].classList.contains('placeholder'))) {
+        bottomnode.children[0].children[0].hidden = true;
+    } else if (qtr_nodes.length === 4) { // allow deletion of top node if bottom node has been added
+        qtr_nodes[1].children[0].children[0].hidden = false;
+    }
+    
 
     // Update schedule bounds to be saved to DB
     POST_changes.dates.end.year = yr;
@@ -231,9 +246,11 @@ window.onload = (event) => {
     for (var i = 1; i < qtr_nodes.length - 1; ++i) {
         qtr_nodes[i].children[0].children[0].addEventListener('click', update_qtrs);
     }
-    // ensure first & last qtrs are deletable
-    qtr_nodes[1].children[0].children[0].hidden = false;
-    qtr_nodes[qtr_nodes.length - 2].children[0].children[0].hidden = false;
+    // ensure first & last qtrs are deleteable, as long as there is > 1 qtr
+    if (qtr_nodes.length > 3) {
+        qtr_nodes[1].children[0].children[0].hidden = false;
+        qtr_nodes[qtr_nodes.length - 2].children[0].children[0].hidden = false;
+    }
 }
 
 // This function is called when hitting the [x] on a quarter (TODO: needs a better name)
@@ -256,7 +273,6 @@ function update_qtrs (event) {
             // get new first from qtr_nodes, set [x] visible
             let first = qtr_nodes[1];
             first.children[0].children[0].hidden = false;
-            // pretty sure I don't need these? first.children[0].children[0].addEventListener('click', update_qtrs);
 
             // update save state with new bounds
             POST_changes.dates.start.year = first.getAttribute('data-yr');
@@ -277,7 +293,6 @@ function update_qtrs (event) {
             // get new last from qtr_nodes, set [x] visible
             let last = qtr_nodes[qtr_nodes.length - 2];
             last.children[0].children[0].hidden = false;
-            //last.children[0].children[0].addEventListener('click', update_qtrs);
 
             // update save state with new bounds
             POST_changes.dates.end.year = last.getAttribute('data-yr');
@@ -311,6 +326,16 @@ function update_qtrs (event) {
             !(course_container.parentNode === qtr_nodes[qtr_nodes.length - 2])){
                 event.target.hidden = true;
             }
+    }
+    // Attempt to handle edge cases around creating/destroying qtrs when
+    // there are 2 or fewer in schedule
+    console.log(qtr_nodes.length);
+    if (qtr_nodes.length === 3) {
+        qtr_nodes[1].children[0].children[0].hidden = true;
+    } else if (qtr_nodes.length === 4) {
+        qtr_nodes[1].children[0].children[0].hidden = false;
+        qtr_nodes[2].children[0].children[0].hidden = false;
+        console.log(qtr_nodes[2].children[0]);
     }
 }
 
