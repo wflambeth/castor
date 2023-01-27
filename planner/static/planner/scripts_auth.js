@@ -168,6 +168,7 @@ function new_quarter(yr, qtr) {
     return parent;
 }
 
+// Add new quarter to top/beginning of schedule
 document.getElementById('add_qtr_before').addEventListener("click", (event) => {
     // get current top node
     let topnode = qtr_nodes[1];
@@ -190,8 +191,16 @@ document.getElementById('add_qtr_before').addEventListener("click", (event) => {
     // Update schedule bounds to be saved to DB
     POST_changes.dates.start.year = yr;
     POST_changes.dates.start.qtr = qtr;
+
+    // Increment course indices
+    for (const [key, value] of Object.entries(crs_idx)){
+        if (value !== -1) {
+            crs_idx[key] += 1;
+        }
+    }
 });
 
+// Add new quarter to bottom/end of schedule
 document.getElementById('add_qtr_after').addEventListener("click", (event) => {
     // get current bottom node
     let bottomnode = qtr_nodes[(qtr_nodes.length - 2)];
@@ -235,27 +244,45 @@ function update_qtrs (event) {
     const course_container = event.target.parentNode.nextElementSibling;
     if (course_container.children[0].classList.contains('placeholder')) {
         /* If container is empty (i.e. has placeholder), we delete it and update the
-           schedule's bounds in the DOM and DB.  */
-        
-       // Banish DOM element to land of wind and ghosts
-        event.target.parentNode.parentNode.remove();
-        // get new first and last from qtr_nodes
-        // (we update both, although only one has changed; lazy/versatile)
-        let first = qtr_nodes[1];
-        let last = qtr_nodes[qtr_nodes.length - 2];
-        // set their [x]es visible
-        first.children[0].children[0].hidden = false;
-        last.children[0].children[0].hidden = false;
-        // set this function as event listener on [x]
-        first.children[0].children[0].addEventListener('click', update_qtrs);
-        last.children[0].children[0].addEventListener('click', update_qtrs);
+           schedule's bounds in the DOM and DB.  
+           Separate/parallel flows for deleting first and last items; no others
+           can be deleted entirely. 
+           */
+        // if node being deleted is the *first* in our list
+        if (qtr_nodes[1].children[1] === course_container) {
+            // kick things off by nuking said element
+            event.target.parentNode.parentNode.remove();
 
-        // update POST_changes with needed info
-        POST_changes.dates.start.year = first.getAttribute('data-yr');
-        POST_changes.dates.start.qtr = first.getAttribute('data-qtr');
-        POST_changes.dates.end.year = last.getAttribute('data-yr');
-        POST_changes.dates.end.qtr = last.getAttribute('data-qtr');
+            // get new first from qtr_nodes, set [x] visible
+            let first = qtr_nodes[1];
+            first.children[0].children[0].hidden = false;
+            // pretty sure I don't need these? first.children[0].children[0].addEventListener('click', update_qtrs);
 
+            // update save state with new bounds
+            POST_changes.dates.start.year = first.getAttribute('data-yr');
+            POST_changes.dates.start.qtr = first.getAttribute('data-qtr');
+
+            // Decrement course indices
+            for (const [key, value] of Object.entries(crs_idx)){
+                if (value !== -1) {
+                    crs_idx[key] -= 1;
+                }
+            }
+            console.log(crs_idx);
+
+        } else if (qtr_nodes[qtr_nodes.length - 2].children[1] === course_container) {
+            // still kick things off by nuking said element
+            event.target.parentNode.parentNode.remove();
+
+            // get new last from qtr_nodes, set [x] visible
+            let last = qtr_nodes[qtr_nodes.length - 2];
+            last.children[0].children[0].hidden = false;
+            //last.children[0].children[0].addEventListener('click', update_qtrs);
+
+            // update save state with new bounds
+            POST_changes.dates.end.year = last.getAttribute('data-yr');
+            POST_changes.dates.end.qtr = last.getAttribute('data-qtr');
+        }
     } else {
         /* If container has courses within it, we keep the container
            and remove all courses/put them back in unscheduled lists. */
