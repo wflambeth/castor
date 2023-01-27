@@ -8,6 +8,11 @@ var drake = dragula({
     return (!el.classList.contains('placeholder'));
   },
   accepts: function (el, target, source, sibling) {
+    /* 
+    Determines whether a course is eligible to be dropped in a given term. 
+    This is true if the course is offered that quarter, and if all prereqs have been 
+    scheduled previously. 
+    */
     if (POST_changes['s'] !== 'NULL') { // TODO: Hack to avoid issues with logged-out demo page; remove
       // course containers always accept their children back to them
       let target_id = target.getAttribute('id');
@@ -18,17 +23,17 @@ var drake = dragula({
       else if (target_id === "elec-container") {
         return (!required);
       }
-      // check that item can be dropped in a given quarter - return false if it cannot
+      // check that item can be dropped in this quarter - return false if it cannot
       let item_id = +el.getAttribute('data-id');
       let target_qtr = +target.parentNode.getAttribute('data-qtr');
       if (quarters[item_id].indexOf(target_qtr) === -1) {
         return false;
       }
-      // check that all prereqs are in place
+      // find index of target qtr, pull course prereqs
       let target_index = Array.from(qtr_nodes).indexOf(target.parentNode);
       for (var prq of prereqs[item_id]) {
         console.log(crs_idx[prq]);
-        // if any are unplaced or placed equal to/after target, return false
+        // if any prereqs are unplaced or placed equal to/after target, return false
         if (crs_idx[prq] === -1 || crs_idx[prq] >= target_index) {
           return false;
         }
@@ -42,6 +47,11 @@ var drake = dragula({
 drake.on('drop', dropLogger);
 
 function dropLogger(el, target, source, sibling) {
+  /* 
+  Handles any drop events when an item is being dragged. 
+  Updates changes to send to DB, adds/removes placeholders for empty qtrs, 
+    and tracks index of each course within the schedule.
+  */
   if (target !== source) {
     // Update changes to be saved
     let id = el.getAttribute('data-id');
@@ -58,17 +68,15 @@ function dropLogger(el, target, source, sibling) {
         target.previousElementSibling.children[0].hidden = false;
       }
     }
-
     // add placeholder to newly-empty container
-    // TODO: replace with function defined in scripts_auth.js
     if (source.getElementsByClassName('course-item').length === 0) {
-      // check if a spare placeholder is handy, use it if so
+      // check if a spare placeholder is handy, make one if not
       if (placeholder === undefined) {
         placeholder = new_placeholder();
       }
       source.appendChild(placeholder);
     }
-    // Update index of courses for validation purposes
+    // Update index of courses for validating drops
     let curr_nodes = Array.from(qtr_nodes);
     let this_index = curr_nodes.indexOf(target.parentNode);
     crs_idx[id] = this_index;

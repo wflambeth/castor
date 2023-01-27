@@ -1,7 +1,8 @@
 "use strict";
 
-/* Save scheduled course updates as logged by dropLogger function (in scripts_base.js) */
 function saveSchedule() {
+    /* Saves any pending changes to the course schedule (dates, scheduled courses), by 
+       JSON-encoding the state object and sending to server POST endpoint. */
     const request = new Request(
         paths.save,
         {headers: {'X-CSRFToken': csrftoken,
@@ -14,10 +15,11 @@ function saveSchedule() {
     fetch(request)
         .then((response) => response.json())
         .then((data) => {
-            // clear save object
-            POST_changes.courses = {};
+            // clear state object after successful save
+            POST_changes.courses = {}; 
             POST_changes.dates.start = {qtr: null, year: null};
             POST_changes.dates.end = {qtr: null, year: null};
+            // report success. TODO: make this visible in UI
             console.log('Success: ', data);
         })
         .catch((error) => {
@@ -27,7 +29,7 @@ function saveSchedule() {
 let saveBtn = document.getElementById('submit-button');
 saveBtn.addEventListener("click", saveSchedule);
 
-/* Edit and save schedule titles
+/* Edit and save schedule titles. TODO: Currently disabled due to jank, coming soon. 
 function updateTitle(text) {
     const request = new Request(
         paths.update_title,
@@ -80,7 +82,8 @@ titleEditLink.addEventListener("click", (event) => {
     }
 });
  */
-/* Delete existing schedules */
+
+/* Delete existing schedules, if requested via sidebar menu. */
 function delete_schedule(event) {
     event.preventDefault();
     const id = event.target.getAttribute('data-delete-id');
@@ -96,11 +99,13 @@ function delete_schedule(event) {
     fetch(request)
         .then(function (response) {
             if (response.status === 204) {
+                // removes item from DOM if removal is successful
                 document.getElementById(id + '_parent').remove();
                 return 'Schedule ' + id + ' deleted';
             } else { return Promise.reject(response); }
         })
         .then(function (msg) {
+            // TODO: add messaging for successful/errored deletion
             console.log(msg);
         })
         .catch(function (err) {
@@ -112,25 +117,29 @@ delete_btns.forEach(btn => {
     btn.addEventListener('click', delete_schedule);
 });
 
-/* Expand existing schedules by semester */
+/* Allows new quarters to be added to schedule. */
+// For iterative title generation
 const qtr_map = {
     '0': 'Winter',
     '1': 'Spring',
     '2': 'Summer',
     '3': 'Fall'
 }
-const add_qtr_before = document.getElementById('add_qtr_before');
-const add_qtr_after = document.getElementById('add_qtr_after');
 let schedule_wrapper = document.getElementById('schedule-wrapper');
 let qtr_nodes = schedule_wrapper.children;
 
 function new_quarter(yr, qtr) {
+    /*
+     Generates new quarter DOM elements as needed. 
+    */
+    // parent div, sets appropriate attributes
     let parent = document.createElement('div');
     parent.setAttribute('class', 'qtr grid');
     parent.setAttribute('id', '_' + yr + '_' + qtr);
     parent.setAttribute('data-yr', yr);
     parent.setAttribute('data-qtr', qtr);
 
+    // title div, including quarter-delete link 
     let title = document.createElement('div');
     title.setAttribute('class', 'term-title');
     title.innerHTML = qtr_map[qtr] + ' ' + yr + ' ';
@@ -142,18 +151,14 @@ function new_quarter(yr, qtr) {
     delete_link.innerText = "[x]";
     delete_link.addEventListener('click', update_qtrs);
     
+    // actual course container/droppable area
     let container = document.createElement('div');
     container.setAttribute('class', 'course-container');
     //TODO: Can I remove these two from child div now that they're in parent? 
     container.setAttribute('data-yr', yr);
     container.setAttribute('data-qtr', qtr);
 
-    let placeholder = document.createElement('div');
-    placeholder.setAttribute('class', 'course-item placeholder');
-    let empty_title = document.createElement('span');
-    empty_title.setAttribute('class', 'empty-title course-title');
-    empty_title.innerHTML = '(empty term)';
-    placeholder.appendChild(empty_title);
+    let placeholder = new_placeholder()
 
     title.appendChild(delete_link);
     parent.appendChild(title);
@@ -163,13 +168,13 @@ function new_quarter(yr, qtr) {
     return parent;
 }
 
-add_qtr_before.addEventListener("click", (event) => {
-    // qtr_nodes declared above; live list of children of sched wrapper
+document.getElementById('add_qtr_before').addEventListener("click", (event) => {
+    // get current top node
     let topnode = qtr_nodes[1];
     let yr = topnode.getAttribute('data-yr');
     let qtr = topnode.getAttribute('data-qtr');
 
-    // Transform data attributes 
+    // Iterate data attributes for new qtr
     if (qtr > 0) {
         qtr -= 1;
     } else {
@@ -182,34 +187,35 @@ add_qtr_before.addEventListener("click", (event) => {
     topnode.children[0].children[0].hidden = true;
     schedule_wrapper.insertBefore(newtop, topnode);
 
+    // Update schedule bounds to be saved to DB
     POST_changes.dates.start.year = yr;
     POST_changes.dates.start.qtr = qtr;
-    console.log(POST_changes);
 });
 
-add_qtr_after.addEventListener("click", (event) => {
+document.getElementById('add_qtr_after').addEventListener("click", (event) => {
+    // get current bottom node
     let bottomnode = qtr_nodes[(qtr_nodes.length - 2)];
     let yr = +bottomnode.getAttribute('data-yr');
     let qtr = +bottomnode.getAttribute('data-qtr');
 
+    // Iterate data attributes for new qtr
     if (qtr > 2) {
         qtr = 0;
         yr = (yr + 1).toString();
     } else {
         qtr = (qtr + 1).toString();
     }
+    // create new node and append at proper place
     let newbottom = new_quarter(yr, qtr);
     bottomnode.children[0].children[0].hidden = true;
     schedule_wrapper.insertBefore(newbottom, bottomnode.nextSibling);
 
+    // Update schedule bounds to be saved to DB
     POST_changes.dates.end.year = yr;
     POST_changes.dates.end.qtr = qtr;
 });
 
-/* CSRF token for fetch authentication */
-const csrftoken = Cookies.get('csrftoken');
-
-// hide delete button 
+// hide delete buttons for non-empty and non-edge terms 
 // TODO: why am I using window.onload here, better way to structure this? 
 window.onload = (event) => {    
     // add event listeners 
@@ -221,51 +227,59 @@ window.onload = (event) => {
     qtr_nodes[qtr_nodes.length - 2].children[0].children[0].hidden = false;
 }
 
+// This function is called when hitting the [x] on a quarter (TODO: needs a better name)
+// Clears qtrs with courses within them, and is also used to delete qtrs on the edges
 function update_qtrs (event) {
     event.preventDefault();
     // get course container
     const course_container = event.target.parentNode.nextElementSibling;
     if (course_container.children[0].classList.contains('placeholder')) {
-        // wipe empty node off the face of the earth
+        /* If container is empty (i.e. has placeholder), we delete it and update the
+           schedule's bounds in the DOM and DB.  */
         
+       // Banish DOM element to land of wind and ghosts
         event.target.parentNode.parentNode.remove();
-        // get first and last from qtr_nodes
+        // get new first and last from qtr_nodes
+        // (we update both, although only one has changed; lazy/versatile)
         let first = qtr_nodes[1];
         let last = qtr_nodes[qtr_nodes.length - 2];
-
         // set their [x]es visible
         first.children[0].children[0].hidden = false;
-        first.children[0].children[0].addEventListener('click', update_qtrs);
         last.children[0].children[0].hidden = false;
+        // set this function as event listener on [x]
+        first.children[0].children[0].addEventListener('click', update_qtrs);
         last.children[0].children[0].addEventListener('click', update_qtrs);
 
         // update POST_changes with needed info
         POST_changes.dates.start.year = first.getAttribute('data-yr');
         POST_changes.dates.start.qtr = first.getAttribute('data-qtr');
-
         POST_changes.dates.end.year = last.getAttribute('data-yr');
         POST_changes.dates.end.qtr = last.getAttribute('data-qtr');
+
     } else {
-        // remove existing classes from non-empty node
+        /* If container has courses within it, we keep the container
+           and remove all courses/put them back in unscheduled lists. */
         const req_container = document.getElementById('req-container');
         const elec_container = document.getElementById('elec-container');
 
+        // Iterate over all courses in container
         while (course_container.children.length > 0) {
             let crs = course_container.children[0];
-            // move scheduled course to appropriate container
+            // move to required/elective container as appropriate
             if (crs.getAttribute('data-req') === 'true'){
                 req_container.insertBefore(crs, req_container.children[0]);
             } else {
                 elec_container.insertBefore(crs, elec_container.children[0]);
             }
-            // update changes to be saved and index for dragging validation
+            // update save state object, index for dragging validation
             let crs_id = crs.getAttribute('data-id');
             POST_changes.courses[crs_id] = {year: null, qtr: null};
             crs_idx[crs_id] = -1;
         }
+        // Add placeholder element
         let placeholder = new_placeholder();
         course_container.append(placeholder);
-        // check if qtr is first/last in list, and hide the x if not
+        // Unless qtr is first/last of sched, hide the [x] (can't delete inner quarters)
         if (!(course_container.parentNode === qtr_nodes[1]) && 
             !(course_container.parentNode === qtr_nodes[qtr_nodes.length - 2])){
                 event.target.hidden = true;
@@ -273,6 +287,7 @@ function update_qtrs (event) {
     }
 }
 
+// Factory for placeholder objects
 function new_placeholder() {
     let placeholder = document.createElement('div');
     placeholder.setAttribute('class', 'course-item placeholder');
@@ -294,3 +309,6 @@ for (var i = 1; i < starting_nodes.length - 1; ++i) {
         }
     }
 }
+
+/* CSRF token for fetch authentication */
+const csrftoken = Cookies.get('csrftoken');
