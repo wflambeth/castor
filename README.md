@@ -9,15 +9,15 @@ For current and prospective students in Oregon State's Postbaccalaureate BSCS pr
 
 # Current Status 
 CASTOR is very much in active development, with the most recent release [live on fly.io](https://castor.fly.dev). Currently, users can: 
-- Experiment with the drag-and-drop scheduling system via the demo landing page
 - Create a password-protected account
-- Build and save up to 10 custom schedules, pairing current OSU courses (both requirements and electives) with the year and quarter of their choice
+- Build and save up to 10 custom schedules, with an easy drag-and-drop UI containing all current OSU course information
+- Enjoy dynamic validation of drags/drops, so users can be sure their schedule is possible (both in terms of course prerequisites and quarter availability)
 - Feast their eyes on a UI that could generously be described as "Windows NT chic" 
+- (without creating an account:) Experiment with the drag-and-drop scheduling system via the demo landing page
 
 # Roadmap 
 Over the coming weeks, these features are next on my list: 
-- A few final core functionalities: renaming schedules, the option to delete empty quarters
-- Dynamic validation of drags/drops, so users can be sure their schedule is possible (both in terms of course prerequisites and quarter availability)
+- More visual cues around prerequisites and quarter availability, to make schedule constraints easier to visualize
 - A UI refresh that at least looks *deliberately* retro
 - OAuth options for account authentication
 - Importing or linking to additional course info: 
