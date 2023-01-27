@@ -1,8 +1,6 @@
 from planner.models import Course, Course_Schedule
 
 def update(schedule, courses, dates):
-    print(dates)
-
     # check if start/end terms have changed (are not null), update if so
     if dates['start']['year'] and dates['start']['qtr']:
         schedule.start_year = dates['start']['year']

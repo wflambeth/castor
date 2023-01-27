@@ -299,7 +299,7 @@ function new_placeholder() {
     return placeholder
 }
 
-/* Set initial indices of crs_idx (for drag validation logic) */
+/* Set initial indices of crs_idx on page load (for drag validation logic) */
 const starting_nodes = Array.from(qtr_nodes);
 for (var i = 1; i < starting_nodes.length - 1; ++i) {
     let nodes = starting_nodes[i].children[1].children;
