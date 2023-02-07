@@ -82,3 +82,15 @@ function dropLogger(el, target, source, sibling) {
     crs_idx[id] = this_index;
   }
 }
+
+// Factory for placeholder objects
+function new_placeholder() {
+  let placeholder = document.createElement('div');
+  placeholder.setAttribute('class', 'course-item placeholder');
+  let empty_title = document.createElement('span');
+  empty_title.setAttribute('class', 'empty-title course-title');
+  empty_title.innerHTML = '(empty term)';
+  placeholder.appendChild(empty_title);
+
+  return placeholder
+}
