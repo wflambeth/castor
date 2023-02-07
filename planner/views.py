@@ -7,6 +7,7 @@ from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequ
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_safe
 from planner.models import Course, Schedule, Course_Schedule, Prereq
+from planner.forms import TitleForm
 
 @require_safe
 def index(request):
@@ -44,6 +45,7 @@ def index(request):
     context = sl.existing(schedule)
     context['user'] = request.user
     context['sched_list'] = sched_list
+    context['form'] = TitleForm(initial={'sched_id': schedule.id, 'title': schedule.name})
     # Render template with given context
     return render(request, 'planner/index.html', context)
 
@@ -109,22 +111,24 @@ def delete(request):
 def update_title(request):
     """
     Updates the title of a given schedule. 
-    TODO: Curently disabled, due to jankiness of implementation. Watch this space!
     """
-    data = json.loads(request.body)
+    form = TitleForm(request.POST)
 
-    try:
-        schedule = Schedule.objects.filter(user=request.user).get(id=int(data['schedule']))
-    except Schedule.DoesNotExist:
-        return HttpResponseBadRequest('Schedule not found')
+    if not form.is_valid():
+        return HttpResponseBadRequest('Invalid form!')
 
-    title = data.get('title')
+    sched_id = form.cleaned_data['sched_id']
+    title = form.cleaned_data['title']
+
     if title is None:
         return HttpResponseBadRequest('Title not found')
     
+    try:
+        schedule = Schedule.objects.filter(user=request.user).get(id=sched_id)
+    except Schedule.DoesNotExist:
+        return HttpResponseBadRequest('Schedule not found')
+
     schedule.name = title
     schedule.save()
     
-    return JsonResponse({'result': 'Title updated!'}, status=200)
-    
-    
+    return redirect(f'/?id={schedule.id}')

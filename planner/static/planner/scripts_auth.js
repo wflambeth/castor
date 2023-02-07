@@ -362,5 +362,20 @@ for (var i = 1; i < starting_nodes.length - 1; ++i) {
     }
 }
 
+/* Update schedule titles  */
+let edit_btn = document.getElementById('title-edit');
+let cancel_btn = document.getElementById('cancel-edit');
+let title_span = document.getElementById('title-span');
+
+edit_btn.addEventListener('click', () => {
+    edit_btn.hidden = true;
+    title_span.hidden = false;
+});
+
+cancel_btn.addEventListener('click', () => {
+    title_span.hidden = true;
+    edit_btn.hidden = false;
+});
+
 /* CSRF token for fetch authentication */
 const csrftoken = Cookies.get('csrftoken');
