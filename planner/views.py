@@ -40,8 +40,7 @@ def index(request):
     else:
         schedule = sched_list[0]
     
-    # Load context, adding the user object and list of user's existing schedules
-    # (Avoids passing user object to schedloader. Why do I care about that? Great question.) 
+    # Load context, adding the user object, list of user's existing schedules, title form for renaming
     context = sl.existing(schedule)
     context['user'] = request.user
     context['sched_list'] = sched_list

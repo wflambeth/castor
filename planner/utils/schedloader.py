@@ -22,7 +22,7 @@ def demo():
 
 def existing(schedule):
     """
-    Loads an existing schedule from DB, along with needed context for rendering course-planer HTML template. 
+    Loads an existing schedule from DB, along with needed context for rendering course-planner HTML template. 
     """
     # Pull all courses, separated into scheduled and unscheduled
     # (Only scheduled courses are associated with the schedule in the DB)
