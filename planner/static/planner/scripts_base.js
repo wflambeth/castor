@@ -1,5 +1,10 @@
 "use strict";
 
+const COURSE_COLOR_DRAG = '#05ff77';
+const COURSE_COLOR_NORM = 'beige';
+const TERM_COLOR_DRAG = 'lightgreen';
+const TERM_COLOR_NORM = '';
+
 var drake = dragula({
   isContainer: function (el) {
     return el.classList.contains('course-container');
@@ -32,7 +37,6 @@ var drake = dragula({
       // find index of target qtr, pull course prereqs
       let target_index = Array.from(qtr_nodes).indexOf(target.parentNode);
       for (var prq of prereqs[item_id]) {
-        console.log(crs_idx[prq]);
         // if any prereqs are unplaced or placed equal to/after target, return false
         if (crs_idx[prq] === -1 || crs_idx[prq] >= target_index) {
           return false;
@@ -80,6 +84,72 @@ function dropLogger(el, target, source, sibling) {
     let curr_nodes = Array.from(qtr_nodes);
     let this_index = curr_nodes.indexOf(target.parentNode);
     crs_idx[id] = this_index;
+  }
+}
+
+if (Object.keys(prereqs).length > 0) { // to avoid issues with logged-out demo page; soon to be fixed
+  drake.on('drag', dragHighlighter);
+  drake.on('dragend', endHighlights);
+
+  // Highlights prereqs and valid drop terms, when a course is dragged
+  function dragHighlighter(el, source) {
+    let course_id = el.getAttribute('data-id');
+    
+    // highlight prereqs
+    let course_prqs = prereqs[course_id];
+    let prq_elements = []
+    for (var prq_id of course_prqs) { // find prereq elements
+      prq_elements.push(document.querySelector('[data-id="' + prq_id + '"]'));
+    } 
+    for (var elem of prq_elements) { // set a background color on them
+      elem.style.background = COURSE_COLOR_DRAG;
+    }
+
+    // highlight terms
+    let terms = Array.from(qtr_nodes);
+    // returns index of latest-placed prereq, or -1 (if prqs still unplaced) or 0 (if no prqs)
+    let final_prq_idx = getFinalPrqIdx(prereqs[course_id], crs_idx);
+    if (final_prq_idx > -1) { 
+    let course_qtrs = quarters[course_id];
+      for (var i = final_prq_idx + 1; i < terms.length - 1; ++i){ // iterator avoids first/last items in the array, which are add-term buttons
+        let this_qtr = terms[i].getAttribute('data-qtr');
+        if (course_qtrs.includes(+this_qtr)) {
+          terms[i].firstElementChild.style.background = TERM_COLOR_DRAG; // 
+        }
+      }
+    }
+  }
+
+  // ends highlights on all terms/courses upon drag end
+  function endHighlights(el) {
+    let courses = document.getElementsByClassName('course');
+    for (var course of courses) {
+      course.style.background = COURSE_COLOR_NORM;
+    }
+    let terms = Array.from(qtr_nodes);
+    for (var i = 1; i < terms.length - 1; ++i){
+      terms[i].firstElementChild.style.background = TERM_COLOR_NORM;
+    }
+  }
+
+  // returns -1 to signal prereq not placed
+  // returns 0 if course has no prereqs
+  // otherwise, returns index of final prereq placed in schedule
+  function getFinalPrqIdx(crs_prq, crs_idx){
+    if (crs_prq.length == 0){
+      return 0;
+    }
+    let index = -1;
+    for (var prereq of crs_prq){
+      let prq_idx = crs_idx[prereq];
+      if (prq_idx == -1){
+        return -1;
+      }
+      else if (prq_idx > index){
+        index = prq_idx;
+      }
+    }
+    return index;
   }
 }
 
