@@ -69,7 +69,7 @@ function dropLogger(el, target, source, sibling) {
       placeholder.remove();
       // check for existence of qtr-delete node, and enable if exists
       if (target.previousElementSibling.children.length > 0) {
-        target.previousElementSibling.children[0].hidden = false;
+        target.previousElementSibling.children[1].hidden = false;
       }
     }
     // add placeholder to newly-empty container
