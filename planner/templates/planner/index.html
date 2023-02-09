@@ -71,6 +71,9 @@
                 {% for course in unsched_elec%}
                 <div class="course-item course" data-id="{{course.course_number}}" data-qtrs="{{course.qtrs}}" data-req="false">
                     <span class="course-number">{{ course.course_number }}</span><span class="course-title">{{ course.title }}</span>
+                    {% if not course.credits == 4 %}
+                    <span class="course-credits">({{ course.credits }})</span>
+                    {% endif %}
                     {% if not course.qtrs|length == 4 %}
                     <span class="quarterspan">
                         <span class={% if 0 in course.qtrs %}"active_qtr"{% else %}"inactive_qtr"{% endif %}>W</span>
@@ -106,6 +109,9 @@
                             data-req="{% if course.course.required %}true{% else %}false{% endif %}"
                             data-qtrs="{{course.course.qtrs}}">
                             <span class="course-number">{{ course.course.course_number }}</span><span class="course-title">{{ course.course.title }}</span>
+                            {% if not course.course.credits == 4 %}
+                            <span class="course-credits">({{ course.course.credits }})</span>
+                            {% endif %}
                             {% if not course.course.qtrs|length == 4 %}
                             <span class="quarterspan">
                                 <span class={% if 0 in course.course.qtrs %}"active_qtr"{% else %}"inactive_qtr"{% endif %}>W</span>
