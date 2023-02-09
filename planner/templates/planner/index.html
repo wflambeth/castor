@@ -3,6 +3,7 @@
 <head>
     {% load static %}
     <link rel="stylesheet" href="{% static 'planner/styles.css' %}">
+    <!--link rel="stylesheet" href="{% static 'planner/bootstrap.css' %}"-->
     <link rel="stylesheet" href="{% static 'planner/dragula.css' %}">
     <script defer src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
     <script defer src="{% static 'planner/dragula.js' %}"></script>
@@ -16,7 +17,7 @@
     <header>
         {% if user.is_authenticated %}
         <span>
-            <h1 id="sched-name">{{ schedule.name }}</h1>
+            <h1 id="sched-name">{{ sched_name }}</h1>
             <button id="title-edit" type="button">Edit Title</button>
             <span id="title-span" hidden>
                 <form action="/update_title" method="post" id="titleform">
@@ -31,8 +32,8 @@
             <button id="submit-button">Save Schedule</button>
             {% else %}
             <h1>Welcome to C.A.S.T.O.R.</h1>
-            <p>This is a demo page only; please first <a href="{% url 'account_login' %}">Log In</a> or <a
-                    href="{% url 'account_signup' %}">Sign Up</a> if you'd like to customize the time frame and save your schedule.</p>
+            <p>This is a demo schedule only; please first <a href="{% url 'account_login' %}">Log In</a> or <a
+                    href="{% url 'account_signup' %}">Sign Up</a> if you'd like to save your schedule.</p>
             {% endif %}
     </header>
     <section id="content" class="grid-wrapper">
@@ -41,7 +42,7 @@
             <h4>My schedules</h4>
             {% for sched in sched_list %}
             <div class="schedules-item" id="{{ sched.id }}_parent">
-                {% if sched.id == schedule.id %}
+                {% if sched.id == sched_id %}
                 <span>{{ sched.name }} <a id="delete-current" href="{% url 'delete' %}?id={{ sched.id }}">[x]</a></span>
                 {% else %}
                 <span><a href="{% url 'index' %}?id={{ sched.id }}">{{ sched.name }}</a> <a
@@ -77,9 +78,7 @@
 
         <div id="schedule">
             <div id="schedule-wrapper" class="term-container grid-wrapper container">
-                {% if user.is_authenticated %}
                 <button class="add_qtr" id="add_qtr_before">+</button>
-                {% endif %}
                     {% for term, courses in sched_qtrs.items %}
                     <div class="qtr grid" id="_{{term.0}}_{{term.1}}" data-yr="{{ term.0 }}" data-qtr="{{ term.1 }}">
                         <div class="term-title">{% if term.1 == 0 %}Winter
@@ -87,9 +86,7 @@
                             {% elif term.1 == 2 %}Summer
                             {% elif term.1 == 3 %}Fall
                             {% endif %}{{term.0}}
-                            {% if user.is_authenticated %}
                             <a href="#" {% if courses|length == 0 %}hidden{% endif %} class="delete-term" data-delete-yr="{{ term.0 }}" data-delete-qtr="{{ term.1 }}">[x]</a>
-                            {% endif %}
                         </div>
                         <div class="course-container" data-yr="{{ term.0 }}" data-qtr="{{ term.1 }}">
                             {% if courses|length > 0 %}
@@ -108,17 +105,14 @@
                         </div>
                     </div>
                 {% endfor %}
-                {% if user.is_authenticated %}
                 <button class="add_qtr" id="add_qtr_after">+</button>
-                {% endif %}
             </div>
         </div>
 
     </section>
     <footer>
         <script>
-            {% if user.is_authenticated %}
-            const page_sched_id = {{ schedule.id }};
+            const page_sched_id = {{ sched_id }};
             const paths = {
                 save: "{% url 'save' %}",
                 update_title: "{% url 'update_title' %}",
@@ -141,26 +135,6 @@
             const prereqs = {{ prereqs }};
             const quarters = {{ quarters }};
             const crs_idx = {{ indices }};
-            {% else %}
-            const POST_changes = {
-                s: 'NULL',
-                courses: {},
-                dates: {
-                    start: {
-                        qtr: 0,
-                        year: 0
-                    },
-                    end: {
-                        qtr: 0, 
-                        year: 0
-                    }
-                }
-            };
-            const crs_idx = {};
-            const qtr_nodes = [];
-            const quarters = {};
-            const prereqs = {};
-            {% endif %}
         </script>
     </footer>
 </body>

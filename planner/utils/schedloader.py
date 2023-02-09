@@ -7,7 +7,11 @@ def demo():
     If user is not logged in, create an empty schedule with 4 terms covering the current year. 
     """
     year = datetime.now().year
+    prereqs, quarters, indices = data_context_builder()
+
     context = {
+        "sched_id": -1,
+        "sched_name": "Demo Schedule",
         "unsched_req": Course.objects.filter(required=True),
         "unsched_elec": Course.objects.filter(required=False),
         "sched_qtrs": {
@@ -15,7 +19,10 @@ def demo():
             (year,1): [], 
             (year,2): [],
             (year,3): []
-        }
+        },
+        "prereqs": prereqs,
+        "quarters": quarters,
+        "indices": indices,
     }
 
     return context
@@ -52,7 +59,8 @@ def existing(schedule):
             year += 1
     
     context = {
-        "schedule": schedule,
+        "sched_id": schedule.id,
+        "sched_name": schedule.name,
         "unsched_req": unsched_courses.filter(required=True),
         "unsched_elec": unsched_courses.filter(required=False),
         "sched_qtrs": sched_qtrs,
