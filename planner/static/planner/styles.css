@@ -68,3 +68,7 @@ header h1,p {
 #titleform { 
     display: inline;
 }
+
+#schedule, #unscheduled {
+    max-width: 35em;
+}
