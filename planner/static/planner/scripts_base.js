@@ -114,7 +114,7 @@ function dragHighlighter(el, source) {
     for (var i = final_prq_idx + 1; i < terms.length - 1; ++i){ // iterator avoids first/last items in the array, which are add-term buttons
       let this_qtr = terms[i].getAttribute('data-qtr');
       if (course_qtrs.includes(+this_qtr)) {
-        terms[i].firstElementChild.style.background = TERM_COLOR_DRAG; // 
+        terms[i].firstElementChild.firstElementChild.style.background = TERM_COLOR_DRAG; // 
       }
     }
   }
@@ -129,7 +129,7 @@ function endHighlights(el) {
   }
   let terms = Array.from(qtr_nodes);
   for (var i = 1; i < terms.length - 1; ++i){
-    terms[i].firstElementChild.style.background = TERM_COLOR_NORM;
+    terms[i].firstElementChild.firstElementChild.style.background = TERM_COLOR_NORM;
   }
 }
 
@@ -179,7 +179,9 @@ function new_quarter(yr, qtr) {
   // title div, including quarter-delete link 
   let title = document.createElement('div');
   title.setAttribute('class', 'term-title');
-  title.innerHTML = qtr_map[qtr] + ' ' + yr + ' ';
+  let title_span = document.createElement('span');
+  title_span.setAttribute('class', 'term-title-span');
+  title_span.innerHTML = qtr_map[qtr] + ' ' + yr + ' ';
   let delete_link = document.createElement('a');
   delete_link.setAttribute('href', '#');
   delete_link.setAttribute('class', 'delete-term');
@@ -196,7 +198,8 @@ function new_quarter(yr, qtr) {
   container.setAttribute('data-qtr', qtr);
 
   let placeholder = new_placeholder()
-
+  
+  title.appendChild(title_span);
   title.appendChild(delete_link);
   parent.appendChild(title);
   parent.appendChild(container);
@@ -227,9 +230,9 @@ document.getElementById('add_qtr_before').addEventListener("click", (event) => {
   // Ensure [x]es are revealed/hidden appropriately on former edge
   // (Hidden if node is not on end, and is empty)
   if (qtr_nodes.length > 4 && (topnode.children[1].children[0].classList.contains('placeholder'))) {
-      topnode.children[0].children[0].hidden = true;
+      topnode.children[0].children[1].hidden = true;
   } else if (qtr_nodes.length === 4) { // allow deletion of bottom node if top node has been added
-      qtr_nodes[2].children[0].children[0].hidden = false;
+      qtr_nodes[2].children[0].children[1].hidden = false;
   }
 
   // Update schedule bounds to be saved to DB
@@ -265,9 +268,9 @@ document.getElementById('add_qtr_after').addEventListener("click", (event) => {
   // Ensure [x]es are revealed/hidden appropriately on former edge
   // (Hidden if node is not on end, and is empty)
   if (qtr_nodes.length > 4 && (bottomnode.children[1].children[0].classList.contains('placeholder'))) {
-      bottomnode.children[0].children[0].hidden = true;
+      bottomnode.children[0].children[1].hidden = true;
   } else if (qtr_nodes.length === 4) { // allow deletion of top node if bottom node has been added
-      qtr_nodes[1].children[0].children[0].hidden = false;
+      qtr_nodes[1].children[0].children[1].hidden = false;
   }
   
 
@@ -281,12 +284,12 @@ document.getElementById('add_qtr_after').addEventListener("click", (event) => {
 window.onload = (event) => {    
   // add event listeners 
   for (var i = 1; i < qtr_nodes.length - 1; ++i) {
-      qtr_nodes[i].children[0].children[0].addEventListener('click', update_qtrs);
+      qtr_nodes[i].children[0].children[1].addEventListener('click', update_qtrs);
   }
   // ensure first & last qtrs are deleteable, as long as there is > 1 qtr
   if (qtr_nodes.length > 3) {
-      qtr_nodes[1].children[0].children[0].hidden = false;
-      qtr_nodes[qtr_nodes.length - 2].children[0].children[0].hidden = false;
+      qtr_nodes[1].children[0].children[1].hidden = false;
+      qtr_nodes[qtr_nodes.length - 2].children[0].children[1].hidden = false;
   }
 }
 
@@ -309,7 +312,7 @@ function update_qtrs (event) {
 
           // get new first from qtr_nodes, set [x] visible
           let first = qtr_nodes[1];
-          first.children[0].children[0].hidden = false;
+          first.children[0].children[1].hidden = false;
 
           // update save state with new bounds
           POST_changes.dates.start.year = first.getAttribute('data-yr');
@@ -327,7 +330,7 @@ function update_qtrs (event) {
 
           // get new last from qtr_nodes, set [x] visible
           let last = qtr_nodes[qtr_nodes.length - 2];
-          last.children[0].children[0].hidden = false;
+          last.children[0].children[1].hidden = false;
 
           // update save state with new bounds
           POST_changes.dates.end.year = last.getAttribute('data-yr');
@@ -365,10 +368,10 @@ function update_qtrs (event) {
   // Attempt to handle edge cases around creating/destroying qtrs when
   // there are 2 or fewer in schedule
   if (qtr_nodes.length === 3) {
-      qtr_nodes[1].children[0].children[0].hidden = true;
+      qtr_nodes[1].children[0].children[1].hidden = true;
   } else if (qtr_nodes.length === 4) {
-      qtr_nodes[1].children[0].children[0].hidden = false;
-      qtr_nodes[2].children[0].children[0].hidden = false;
+      qtr_nodes[1].children[0].children[1].hidden = false;
+      qtr_nodes[2].children[0].children[1].hidden = false;
   }
 }
 
