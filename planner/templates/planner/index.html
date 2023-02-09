@@ -62,7 +62,7 @@
             <div class="course-container" id="req-container">
                 {% for course in unsched_req %}
                 <div class="course-item course" data-id="{{course.course_number}}" data-qtrs="{{course.qtrs}}" data-req="true">
-                    <span class="course-title">{{ course }}</span>
+                    <span class="course-number">{{ course.course_number }}</span><span class="course-title">{{ course.title }}</span>
                 </div>
                 {% endfor %}
             </div>
@@ -70,7 +70,15 @@
             <div class="course-container" id="elec-container">
                 {% for course in unsched_elec%}
                 <div class="course-item course" data-id="{{course.course_number}}" data-qtrs="{{course.qtrs}}" data-req="false">
-                    <span class="course-title">{{ course }}</span>
+                    <span class="course-number">{{ course.course_number }}</span><span class="course-title">{{ course.title }}</span>
+                    {% if not course.qtrs|length == 4 %}
+                    <span class="quarterspan">
+                        <span class={% if 0 in course.qtrs %}"active_qtr"{% else %}"inactive_qtr"{% endif %}>W</span>
+                        <span class={% if 1 in course.qtrs %}"active_qtr"{% else %}"inactive_qtr"{% endif %}>S</span>
+                        <span class={% if 2 in course.qtrs %}"active_qtr"{% else %}"inactive_qtr"{% endif %}>S</span>
+                        <span class={% if 3 in course.qtrs %}"active_qtr"{% else %}"inactive_qtr"{% endif %}>F</span>
+                    </span>
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
@@ -97,7 +105,15 @@
                             <div class="course-item course" data-id="{{course.course.course_number}}"
                             data-req="{% if course.course.required %}true{% else %}false{% endif %}"
                             data-qtrs="{{course.course.qtrs}}">
-                                <span class="course-title">{{ course.course }}</span>
+                            <span class="course-number">{{ course.course.course_number }}</span><span class="course-title">{{ course.course.title }}</span>
+                            {% if not course.course.qtrs|length == 4 %}
+                            <span class="quarterspan">
+                                <span class={% if 0 in course.course.qtrs %}"active_qtr"{% else %}"inactive_qtr"{% endif %}>W</span>
+                                <span class={% if 1 in course.course.qtrs %}"active_qtr"{% else %}"inactive_qtr"{% endif %}>S</span>
+                                <span class={% if 2 in course.course.qtrs %}"active_qtr"{% else %}"inactive_qtr"{% endif %}>S</span>
+                                <span class={% if 3 in course.course.qtrs %}"active_qtr"{% else %}"inactive_qtr"{% endif %}>F</span>
+                            </span>
+                            {% endif %}
                             </div>
                             {% endfor %}
                             {% else %}

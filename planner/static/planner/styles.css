@@ -31,18 +31,18 @@ header h1,p {
 
 .course-item {
     margin: .1em 0;
-    padding: .5em;
     background-color: beige;
     border: 2px blue solid;
+    padding: .5em;
+}
+
+.course-number, .course-title {
+    
 }
 
 .placeholder {
     border: 2px grey dotted;
     background-color: aliceblue;
-}
-
-.course-title {
-    padding: 5%;
 }
 
 .course-container {
@@ -71,4 +71,34 @@ header h1,p {
 
 #schedule, #unscheduled {
     max-width: 35em;
+}
+
+.course-number {
+    font-weight: bold;
+    padding-right: .5em;
+}
+
+.quarterspan {
+    float: right;
+    margin-right: -4px;
+}
+
+.active_qtr, .inactive_qtr {
+    margin-left: -4px;
+}
+
+.active_qtr {
+    font-weight: bold;
+}
+
+.inactive_qtr {
+    font-weight: lighter;
+}
+
+#add_qtr_before {
+    margin-bottom: 1em;
+}
+
+h2 {
+    margin-bottom: -.5em;
 }
