@@ -8,9 +8,9 @@ body {
 }
 
 header {
-    padding: 2em;
+    padding: 1em;
     background-size: contain;
-    background-position: right 100px center;
+    background-position: right 10px center;
     background-repeat: no-repeat;
     background-color: tan;
     background-origin: border-box;
@@ -19,7 +19,6 @@ header {
 
 header h1,p {
     display: inline;
-    margin: .5em;
 }
 
 #submit-button {
@@ -61,7 +60,7 @@ header h1,p {
 }
 
 .course-container {
-    padding: 1em 0em 1em 0em;
+    margin: 1em 0em 1em 0em;
     max-width: 33em;
 }
 
@@ -111,7 +110,7 @@ header h1,p {
 }
 
 #add_qtr_before {
-    margin-bottom: 1em;
+    margin-bottom: .5em;
 }
 
 h2 {
@@ -137,4 +136,28 @@ a {
     font-weight: bold;
     padding-top: 1em;
     padding-bottom: -1em;
+}
+
+.add_qtr {
+    font-size: 20px;
+    background-color: lightgray;
+}
+
+footer {
+    border-top: 5px saddlebrown solid;
+    background-color: tan;
+}
+
+#footer-content {
+    margin: 1em 1.5em 0 1.5em;
+    padding-bottom: 1em;
+}
+
+.footer-link {
+    margin-bottom: .2em;
+    display: inline-block;
+}
+
+#catalog-link, #explorer-link {
+    float: right;
 }

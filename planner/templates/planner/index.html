@@ -16,8 +16,10 @@
 <body>
     <header style="background-image:url('{% static 'planner/logo.png' %}')">
         {% if user.is_authenticated %}
-        <span>
-            <h1 id="sched-name">{{ sched_name }}</h1>
+            <div>
+                <h1 id="sched-name">{{ sched_name }}</h1>
+            </div>
+            <div>
             <button id="title-edit" type="button">Edit Title</button>
             <span id="title-span" hidden>
                 <form action="/update_title" method="post" id="titleform">
@@ -28,6 +30,7 @@
                 <button id="cancel-edit" type="button">[x]</button>
             </span>
             <button id="submit-button">Save Schedule</button>
+            </div>
             {% else %}
             <h1>Welcome to C.A.S.T.O.R.</h1>
             {% endif %}
@@ -138,6 +141,19 @@
 
     </section>
     <footer>
+        <div id="footer-content">
+            <div class="footer-top">
+                <span class="footer-link" id="credit-link">C.A.S.T.O.R. by <a href="https://www.linkedin.com/in/will-lambeth">Will Lambeth</a></span>
+                <span class="footer-link" id="catalog-link">Information courtesy <a href="https://ecampus.oregonstate.edu/soc/ecatalog/ecourselist.htm?termcode=all&subject=CS">Oregon State Ecampus catalog</a></span>
+            </div> 
+
+            <div class="footer-bottom">
+                <span class="footer-link" id="github-link">Readme and source code available <a href="https://www.github.com/wflambeth/castor">on GitHub</a></span>
+                <span class="footer-link" id="explorer-link">More course info at the <a href="https://osu-cs-course-explorer.com/">OSU CS Course Explorer</a></span>
+            </div>
+            
+            
+        </div>
         <script>
             const page_sched_id = {{ sched_id }};
             const paths = {
