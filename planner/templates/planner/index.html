@@ -27,18 +27,20 @@
                 </form>
                 <button id="cancel-edit" type="button">[x]</button>
             </span>
-            <p>{{ user.username }}</p>
-            <a href="{% url 'account_logout' %}">(log out)</a>
             <button id="submit-button">Save Schedule</button>
             {% else %}
             <h1>Welcome to C.A.S.T.O.R.</h1>
-            <p>This is a demo schedule only; please first <a href="{% url 'account_login' %}">Log In</a> or <a
-                    href="{% url 'account_signup' %}">Sign Up</a> if you'd like to save your schedule.</p>
             {% endif %}
     </header>
+    {% if not user.is_authenticated %}
+    <div id="demo-warning"><p>This is a demo schedule only; please first <a href="{% url 'account_login' %}">Log In</a> or <a
+        href="{% url 'account_signup' %}">Sign Up</a> if you'd like to save your schedule.</p></div>
+    {% endif %}
     <section id="content" class="grid-wrapper">
         <div id="schedules-list">
             {% if user.is_authenticated %}
+            <p id="user-name">{{ user.username }}</p>
+            <a href="{% url 'account_logout' %}">(log out)</a>
             <h4>My schedules</h4>
             {% for sched in sched_list %}
             <div class="schedules-item" id="{{ sched.id }}_parent">

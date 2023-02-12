@@ -118,6 +118,23 @@ h2 {
     margin-bottom: -.5em;
 }
 
+h4 {
+    margin-bottom: .3em;
+}
+
 a {
     color: #c34500;
+}
+
+#user-name {
+    font-weight: bold;
+    margin: 0;
+
+}
+
+#demo-warning {
+    text-align: center;
+    font-weight: bold;
+    padding-top: 1em;
+    padding-bottom: -1em;
 }
