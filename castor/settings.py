@@ -36,9 +36,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.sites",
     "django.contrib.staticfiles",
+    "allauth_ui",
     "allauth",
     "allauth.account",
-    "allauth.socialaccount"
+    "allauth.socialaccount",
+    "widget_tweaks",
 ]
 
 MIDDLEWARE = [
