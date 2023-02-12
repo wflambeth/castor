@@ -1,7 +1,7 @@
 "use strict";
 
 const COURSE_COLOR_DRAG = '#7A3D00';
-const COURSE_COLOR_NORM = 'beige';
+const COURSE_COLOR_NORM = '#FFFAF3';
 const TERM_COLOR_DRAG = 'lightgreen';
 const TERM_COLOR_NORM = '';
 

@@ -14,7 +14,7 @@
 </head>
 
 <body>
-    <header>
+    <header style="background-image:url('{% static 'planner/logo.png' %}')">
         {% if user.is_authenticated %}
         <span>
             <h1 id="sched-name">{{ sched_name }}</h1>
