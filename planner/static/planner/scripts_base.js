@@ -73,7 +73,9 @@ function dropLogger(el, target, source, sibling) {
       }
     }
     // add placeholder to newly-empty container
-    if (source.getElementsByClassName('course-item').length === 0) {
+    if (source.getElementsByClassName('course-item').length === 0
+        && source.getAttribute('id') !== 'req-container'
+        && source.getAttribute('id') !== 'elec-container') {
       // check if a spare placeholder is handy, make one if not
       if (placeholder === undefined) {
         placeholder = new_placeholder();
