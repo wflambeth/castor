@@ -10,7 +10,11 @@
     <script defer src="{% static 'planner/scripts_base.js' %}"></script>
     {% if user.is_authenticated %}
     <script defer src="{% static 'planner/scripts_auth.js' %}"></script>
+    <title>{{ sched_name }} - C.A.S.T.O.R.</title>
+    {% else %}
+    <title>C.A.S.T.O.R.</title>
     {% endif %}
+
 </head>
 
 <body>
