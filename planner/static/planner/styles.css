@@ -21,6 +21,12 @@ header h1,p {
     display: inline;
 }
 
+@media (width <= 1000px){
+    header {
+        background-size: 0;
+    }
+}
+
 #submit-button {
     margin-left: 30px; 
 }
