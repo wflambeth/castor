@@ -114,7 +114,7 @@ function dragHighlighter(el, source) {
     for (var i = final_prq_idx + 1; i < terms.length - 1; ++i){ // iterator avoids first/last items in the array, which are add-term buttons
       let this_qtr = terms[i].getAttribute('data-qtr');
       if (course_qtrs.includes(+this_qtr)) {
-        terms[i].firstElementChild.firstElementChild.style.background = TERM_COLOR_DRAG; // 
+        terms[i].children[1].style.outline = "4px groove " + TERM_COLOR_DRAG; // 
       }
     }
   }
@@ -129,7 +129,7 @@ function endHighlights(el) {
   }
   let terms = Array.from(qtr_nodes);
   for (var i = 1; i < terms.length - 1; ++i){
-    terms[i].firstElementChild.firstElementChild.style.background = TERM_COLOR_NORM;
+    terms[i].children[1].style.outline = "";
   }
 }
 
