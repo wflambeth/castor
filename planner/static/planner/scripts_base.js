@@ -279,6 +279,7 @@ document.getElementById('add_qtr_after').addEventListener("click", (event) => {
   // Update schedule bounds to be saved to DB
   POST_changes.dates.end.year = yr;
   POST_changes.dates.end.qtr = qtr;
+  console.log(POST_changes);
 });
 
 // hide delete buttons for non-empty and non-edge terms 

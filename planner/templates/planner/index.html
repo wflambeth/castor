@@ -18,6 +18,7 @@
 </head>
 
 <body>
+    <div id="main-wrapper">
     <header style="background-image:url('{% static 'planner/logo.png' %}')">
         {% if user.is_authenticated %}
             <div>
@@ -144,6 +145,8 @@
         </div>
 
     </section>
+</div>
+
     <footer>
         <div id="footer-content">
             <div class="footer-top">

@@ -5,6 +5,21 @@
 html, body {
     padding: 0;
     margin: 0;
+    height: 100%;
+}
+
+#main-wrapper {
+    min-height: 100%;
+    margin-bottom: -85px;
+}
+
+#main-wrapper:after {
+    content: "";
+    display: block;
+}
+
+footer, #main-wrapper:after {
+    height: 85px;
 }
 
 header {
@@ -152,6 +167,7 @@ a {
 footer {
     border-top: 5px saddlebrown solid;
     background-color: tan;
+    height: 100px;
 }
 
 #footer-content {
