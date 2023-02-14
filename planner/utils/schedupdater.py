@@ -1,12 +1,14 @@
 from planner.models import Course, Course_Schedule
 
 def update(schedule, courses, dates):
-    # check if start/end terms have changed (are not null), update if so
-    if dates['start']['year'] and dates['start']['qtr']:
+    # check if start/end terms have changed, update if so
+    if dates['start']['year'] is not None and dates['start']['qtr'] is not None:
+        print(dates)
         schedule.start_year = dates['start']['year']
         schedule.start_qtr = dates['start']['qtr']
 
-    if dates['end']['year'] and dates['end']['qtr']:
+    if dates['end']['year'] is not None and dates['end']['qtr'] is not None:
+        print(dates)
         schedule.end_year = dates['end']['year']
         schedule.end_qtr = dates['end']['qtr']
     
