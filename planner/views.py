@@ -3,7 +3,7 @@ import planner.utils.schedloader as sl
 import planner.utils.schedupdater as su
 from django.shortcuts import HttpResponse, render, redirect
 from django.template import loader
-from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequest, HttpResponseServerError
+from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequest, HttpResponseServerError, HttpResponseNotAllowed
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_safe
 from planner.models import Course, Schedule, Course_Schedule, Prereq
@@ -53,10 +53,13 @@ def router(request, sched_id):
         return display(request, sched_id)
     elif request.method == 'DELETE':
         return delete(request, sched_id)
+    elif request.method == 'POST':
+        return update_title(request)
     elif request.method == 'PATCH':
-        # check if form included is a title update or schedule body update
-        # call appropriate handler
+        #return save(request)
         pass
+    else:
+        return HttpResponseNotAllowed(['GET', 'POST', 'DELETE', 'PATCH'])
 
 
 @login_required
@@ -141,8 +144,6 @@ def delete(request, sched_id):
     # Confirm successful deletion
     return HttpResponse(status=204)
 
-@login_required
-@require_http_methods(["POST"])
 def update_title(request):
     """
     Updates the title of a given schedule. 
@@ -164,6 +165,9 @@ def update_title(request):
         return HttpResponseBadRequest('Schedule not found')
 
     schedule.name = title
-    schedule.save()
+    try:
+        schedule.save()
+    except:
+        return HttpResponseServerError('Error saving schedule')
     
     return redirect(f'/?id={schedule.id}')
