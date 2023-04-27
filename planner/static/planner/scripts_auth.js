@@ -1,7 +1,7 @@
 "use strict";
 
 /* 
-Scripts for auth-only functions (saving/deleting schedules, updating schedule names)
+Scripts for auth-only functions (creating/saving/deleting schedules, updating schedule names)
 */
 
 function createSchedule() {
@@ -24,6 +24,11 @@ function createSchedule() {
             // log error if schedule creation fails
             console.log('Error creating schedule:', error);
         });
+}
+
+let create_btn = document.getElementById('create-sched');
+if (create_btn !== null) { // (e.g. if max schedules not reached)
+    create_btn.addEventListener('click', createSchedule);    
 }
 
 function saveSchedule() {
@@ -52,10 +57,11 @@ function saveSchedule() {
             console.log('Error saving schedule:', error);
         });
 }
+
 let saveBtn = document.getElementById('submit-button');
 saveBtn.addEventListener("click", saveSchedule);
 
-/* Delete existing schedules, if requested via sidebar menu. */
+/* Delete existing schedules via sidebar menu. */
 function delete_schedule(event) {
     event.preventDefault();
     const id = event.target.getAttribute('data-delete-id');
@@ -94,16 +100,16 @@ function delete_schedule(event) {
             console.error(err);
         });
 }
+
 const delete_btns = Object.values(document.getElementsByClassName('delete-sched'));
 delete_btns.forEach(btn => {
     btn.addEventListener('click', delete_schedule);
 });
 
-/* Update schedule titles  */
+/* Control visibility for update-title form elements  */
 let edit_btn = document.getElementById('title-edit');
 let cancel_btn = document.getElementById('cancel-edit');
 let title_span = document.getElementById('title-span');
-let create_btn = document.getElementById('create-sched');
 
 edit_btn.addEventListener('click', () => {
     edit_btn.hidden = true;
@@ -115,9 +121,7 @@ cancel_btn.addEventListener('click', () => {
     edit_btn.hidden = false;
 });
 
-if (create_btn !== null) { // (e.g. if max schedules not reached)
-    create_btn.addEventListener('click', createSchedule);    
-}
+
 
 /* CSRF token for fetch authentication */
 const csrftoken = Cookies.get('csrftoken');
