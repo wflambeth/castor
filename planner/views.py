@@ -3,7 +3,7 @@ import planner.utils.schedloader as sl
 import planner.utils.schedupdater as su
 from django.shortcuts import HttpResponse, render, redirect
 from django.template import loader
-from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequest
+from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequest, HttpResponseServerError
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_safe
 from planner.models import Course, Schedule, Course_Schedule, Prereq
@@ -12,8 +12,9 @@ from planner.forms import TitleForm
 @require_safe
 def index(request):
     """
-    Takes requests to index URL ("/"), and returns a scheduler page. 
-    Generally called by links within the template, and includes an "id" URL parameter (optional).
+    Takes requests to index URL ("/"), and redirects to a scheduler page ("/:id"). 
+    Loads a demo page (if user is unauthenticated), or the most recently created schedule for the user.
+    Creates a schedule for the user if none exists. 
     """
 
     # If user is logged out, show 'demo' schedule
@@ -21,32 +22,20 @@ def index(request):
         return render(request, 'planner/index.html', sl.demo())
 
     # Check for existing schedules for this user
-    # If none exist, create one and return to this flow
     sched_list = Schedule.objects.filter(user=request.user)
-    if not sched_list.exists() and len(sched_list) < 10:
-        return redirect('/create')
-  
-    # Get ID of requested schedule
-    # (For newly-created schedules, this will be passed by /create handler)
-    id = request.GET.get('id')
-    if id:
-        # attempt to pull requested schedule using ID/user combo
-        try: 
-            schedule = sched_list.get(id=id)
-        except Schedule.DoesNotExist:
-            schedule = sched_list[0]
-    # If user did not request a specific schedule 
-    # (or requested an invalid one), return oldest schedule
+    # If none exist, create a new one
+    if not sched_list.exists():
+        try:
+            schedule = sl.new(request.user)
+            schedule.save()
+        except:
+            return HttpResponseServerError('Error creating new schedule')
+    # otherwise, load most recently created
     else:
-        schedule = sched_list[0]
-    
-    # Load context, adding the user object, list of user's existing schedules, title form for renaming
-    context = sl.existing(schedule)
-    context['user'] = request.user
-    context['sched_list'] = sched_list
-    context['form'] = TitleForm(initial={'sched_id': schedule.id, 'title': schedule.name})
-    # Render template with given context
-    return render(request, 'planner/index.html', context)
+        schedule = sched_list[-1]
+
+    # Redirect to the schedule's index page
+    return redirect('schedule', sched_id=schedule.id)
 
 @login_required
 def router(request, sched_id):
@@ -68,6 +57,9 @@ def schedule(request, sched_id):
     Rejects unauthenticated requests or schedules which do not exist/are not this user's.
     """
     
+    if sched_id is None:
+        return redirect('/')
+
     # Obtain all schedules for this user (to pass to template)
     sched_list = Schedule.objects.filter(user=request.user)
 
@@ -99,7 +91,7 @@ def create(request):
     
     schedule = sl.new(request.user)
     schedule.save()
-    return redirect(f'/?id={schedule.id}')
+    return redirect('schedule', sched_id=schedule.id)
 
 @login_required
 @require_http_methods(["POST"])
