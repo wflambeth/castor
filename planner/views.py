@@ -32,10 +32,10 @@ def index(request):
             return HttpResponseServerError('Error creating new schedule')
     # otherwise, load most recently created
     else:
-        schedule = sched_list[-1]
+        schedule = sched_list.last()
 
     # Redirect to the schedule's index page
-    return redirect('schedule', sched_id=schedule.id)
+    return redirect(f'schedule/{schedule.id}')
 
 @login_required
 def router(request, sched_id):
@@ -91,7 +91,7 @@ def create(request):
     
     schedule = sl.new(request.user)
     schedule.save()
-    return redirect('schedule', sched_id=schedule.id)
+    return redirect(f'schedule/{schedule.id}')
 
 @login_required
 @require_http_methods(["POST"])
