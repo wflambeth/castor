@@ -56,7 +56,7 @@ function delete_schedule(event) {
             // log that schedule was deleted
             console.log(msg);
             if (page_sched_id == id) {
-                // if current schedule was deleted, load index
+                // if current schedule was deleted, load most recently created
                 window.open("/", "_self");
             } else {
                 // otherwise, remove schedule from sidebar
