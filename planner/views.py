@@ -13,7 +13,7 @@ from planner.forms import TitleForm
 def index(request):
     """
     Takes requests to index URL ("/"), and redirects to a scheduler page ("/:id"). 
-    Loads a demo page (if user is unauthenticated), or the most recently created schedule for the user.
+    Loads a demo page if user is unauthenticated. 
     Creates a schedule for the user if none exists. 
     """
 
@@ -67,15 +67,10 @@ def schedule(request, sched_id):
     try:
         schedule = sched_list.get(id=sched_id)
     except Schedule.DoesNotExist:
-        # TODO: should this just redirect to index?
         return HttpResponseBadRequest('Schedule not found')
 
-    # Load context, adding: user object, list of user schedules, retitling form
-    context = sl.existing(schedule)
-    context['user'] = request.user
-    context['sched_list'] = sched_list
-    context['form'] = TitleForm(initial={'sched_id': schedule.id, 'title': schedule.name})
-    # Render template with given context
+    # Load context and render template
+    context = sl.existing(schedule, request.user, sched_list)
     return render(request, 'planner/index.html', context)
 
 @login_required

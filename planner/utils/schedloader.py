@@ -1,5 +1,6 @@
 
 from planner.models import Course, Schedule, Course_Schedule, Prereq
+from planner.forms import TitleForm
 from datetime import datetime
 
 def demo():
@@ -27,7 +28,7 @@ def demo():
 
     return context
 
-def existing(schedule):
+def existing(schedule, user, sched_list):
     """
     Loads an existing schedule from DB, along with needed context for rendering course-planner HTML template. 
     """
@@ -59,6 +60,8 @@ def existing(schedule):
             year += 1
     
     context = {
+        "user": user,
+        "sched_list": sched_list,
         "sched_id": schedule.id,
         "sched_name": schedule.name,
         "unsched_req": unsched_courses.filter(required=True),
@@ -67,6 +70,7 @@ def existing(schedule):
         "prereqs": prereqs,
         "quarters": quarters,
         "indices": indices,
+        "form": TitleForm(initial={'sched_id': schedule.id, 'title': schedule.name})
     }
 
     return context
