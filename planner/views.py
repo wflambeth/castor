@@ -49,6 +49,32 @@ def index(request):
     return render(request, 'planner/index.html', context)
 
 @login_required
+@require_safe
+def schedule(request, sched_id):
+    """
+    Handles requests in the format "/:sched_id", where sched_id is the ID of an existing schedule.
+    Rejects unauthenticated requests or schedules which do not exist/are not this user's.
+    """
+    
+    # Obtain all schedules for this user (to pass to template)
+    sched_list = Schedule.objects.filter(user=request.user)
+
+    # Pull requested schedule using ID and user
+    try:
+        schedule = sched_list.get(id=sched_id)
+    except Schedule.DoesNotExist:
+        # TODO: should this just redirect to index?
+        return HttpResponseBadRequest('Schedule not found')
+
+    # Load context, adding: user object, list of user schedules, retitling form
+    context = sl.existing(schedule)
+    context['user'] = request.user
+    context['sched_list'] = sched_list
+    context['form'] = TitleForm(initial={'sched_id': schedule.id, 'title': schedule.name})
+    # Render template with given context
+    return render(request, 'planner/index.html', context)
+
+@login_required
 @require_http_methods(["GET"])
 def create(request):
     """
