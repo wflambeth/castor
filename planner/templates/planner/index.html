@@ -60,10 +60,9 @@
                 </span>
             </div>
             {% endfor %}
-            {% if sched_list|length < 10 %} <div class="schedules-item" id="create-sched">
-                <a href="{% url 'create' %}">Create New Schedule</a>
-        </div>
-        {% endif %}
+            <div class="schedules-item" id="create-sched" {% if sched_list|length == 10 %}hidden{% endif %}>
+                <a href="#">Create New Schedule</a>
+            </div>
         {% endif %}
         </div>
 
@@ -166,7 +165,6 @@
             const paths = {
                 save: "{% url 'save' %}",
                 update_title: "{% url 'update_title' %}",
-                delete: "{% url 'delete' %}"
             }
             const POST_changes = { 
                 s: page_sched_id, 

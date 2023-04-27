@@ -9,6 +9,8 @@ from django.views.decorators.http import require_http_methods, require_safe
 from planner.models import Course, Schedule, Course_Schedule, Prereq
 from planner.forms import TitleForm
 
+MAX_SCHEDULES = 10
+
 @require_safe
 def index(request):
     """
@@ -74,19 +76,30 @@ def schedule(request, sched_id):
     return render(request, 'planner/index.html', context)
 
 @login_required
-@require_http_methods(["GET"])
+@require_http_methods(["GET","POST"])
 def create(request):
     """
-    Builds new schedule, and redirects requestor to that schedule's index page. 
+    Builds new schedule when called via POST request from logged-in user.
+    Returns JSON with creation result and (if successful) schedule ID.
     """
-    sched_list = Schedule.objects.filter(user=request.user)
-    # TODO: error messaging around the number of schedules one can create
-    if len(sched_list) > 9:
+
+    # if (accidental) GET request, redirect to index view
+    if request.method == 'GET':
         return redirect('/')
+
+    # Check if user already has max number of schedules
+    sched_list = Schedule.objects.filter(user=request.user)
+    if len(sched_list) >= MAX_SCHEDULES:
+        return JsonResponse({'msg': 'Maximum schedules reached'},status=403)
     
-    schedule = sl.new(request.user)
-    schedule.save()
-    return redirect(f'schedule/{schedule.id}')
+    # Create new schedule, save to DB, and return ID
+    try:
+        schedule = sl.new(request.user)
+        schedule.save()
+    except:
+        return JsonResponse({'msg': 'Error creating schedule'}, status=500)
+
+    return JsonResponse({'msg': 'Schedule created', 'schedule': schedule.id}, status=200)
 
 @login_required
 @require_http_methods(["POST"])
