@@ -115,8 +115,7 @@ cancel_btn.addEventListener('click', () => {
     edit_btn.hidden = false;
 });
 
-// create_btn will not appear if max schedules reached
-if (create_btn !== null) {
+if (create_btn !== null) { // (e.g. if max schedules not reached)
     create_btn.addEventListener('click', createSchedule);    
 }
 

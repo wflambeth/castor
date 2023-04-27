@@ -25,27 +25,32 @@ def index(request):
 
     # Check for existing schedules for this user
     sched_list = Schedule.objects.filter(user=request.user)
-    # If none exist, create a new one
-    if not sched_list.exists():
+    # Load most recently created, if possible
+    if sched_list.exists():
+        schedule = sched_list.last()
+    
+    # If they have no schedules, create one and display it
+    else:
         try:
             schedule = sl.new(request.user)
             schedule.save()
         except:
-            return HttpResponseServerError('Error creating new schedule')
-    # otherwise, load most recently created
-    else:
-        schedule = sched_list.last()
+            return HttpResponseServerError('Error creating new schedule')    
 
     # Redirect to the schedule's index page
     return redirect(f'schedule/{schedule.id}')
 
 @login_required
 def router(request, sched_id):
+    """
+    Handles requests to schedule pages ("/:id").
+    Dispatches to a handler based on request method.
+    """
     if sched_id is None:
         return redirect('/')
 
     if request.method == 'GET':
-        return schedule(request, sched_id)
+        return display(request, sched_id)
     elif request.method == 'DELETE':
         return delete(request, sched_id)
     elif request.method == 'PATCH':
@@ -56,10 +61,9 @@ def router(request, sched_id):
 
 @login_required
 @require_safe
-def schedule(request, sched_id):
+def display(request, sched_id):
     """
-    Handles requests in the format "/:sched_id", where sched_id is the ID of an existing schedule.
-    Rejects unauthenticated requests or schedules which do not exist/are not this user's.
+    Displays a specific schedule page ("/:id").
     """
 
     # Obtain all schedules for this user (to pass to template)
@@ -79,8 +83,8 @@ def schedule(request, sched_id):
 @require_http_methods(["GET","POST"])
 def create(request):
     """
-    Builds new schedule when called via POST request from logged-in user.
-    Returns JSON with creation result and (if successful) schedule ID.
+    Creates a new schedule, when requested via POST.
+    Requires no contents in request body.
     """
 
     # if (accidental) GET request, redirect to index view
@@ -120,8 +124,7 @@ def save(request):
 @login_required
 def delete(request, sched_id):
     """
-    Deletes the schedule with the passed ID, provided
-    it exists and is owned by the requesting user. 
+    Deletes a schedule from the database.
     """
     # Grab schedule object from DB
     try: 
