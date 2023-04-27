@@ -74,6 +74,21 @@ def schedule(request, sched_id):
     return render(request, 'planner/index.html', context)
 
 @login_required
+@require_http_methods(["GET"])
+def create(request):
+    """
+    Builds new schedule, and redirects requestor to that schedule's index page. 
+    """
+    sched_list = Schedule.objects.filter(user=request.user)
+    # TODO: error messaging around the number of schedules one can create
+    if len(sched_list) > 9:
+        return redirect('/')
+    
+    schedule = sl.new(request.user)
+    schedule.save()
+    return redirect(f'schedule/{schedule.id}')
+
+@login_required
 @require_http_methods(["POST"])
 def save(request): 
     """
