@@ -51,12 +51,13 @@
             <h4>My schedules</h4>
             {% for sched in sched_list %}
             <div class="schedules-item" id="{{ sched.id }}_parent">
-                {% if sched.id == sched_id %}
-                <span>{{ sched.name }} <a id="delete-current" href="{% url 'delete' %}?id={{ sched.id }}">[x]</a></span>
-                {% else %}
-                <span><a href="{% url 'index' %}schedule/{{ sched.id }}">{{ sched.name }}</a> <a
-                        data-delete-id="{{ sched.id }}" class="delete-sched" href="#">[x]</a></span>
-                {% endif %}
+                <span>
+                    {% if sched.id == sched_id %} {{ sched.name }} 
+                    {% else %}
+                    <a href="{% url 'index' %}schedule/{{ sched.id }}">{{ sched.name }}</a>
+                    {% endif %}
+                    <a data-delete-id="{{ sched.id }}" class="delete-sched" href="#">[x]</a>
+                </span>
             </div>
             {% endfor %}
             {% if sched_list|length < 10 %} <div class="schedules-item" id="create-sched">

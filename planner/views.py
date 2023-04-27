@@ -39,6 +39,9 @@ def index(request):
 
 @login_required
 def router(request, sched_id):
+    if sched_id is None:
+        return redirect('/')
+
     if request.method == 'GET':
         return schedule(request, sched_id)
     elif request.method == 'DELETE':
@@ -56,9 +59,6 @@ def schedule(request, sched_id):
     Handles requests in the format "/:sched_id", where sched_id is the ID of an existing schedule.
     Rejects unauthenticated requests or schedules which do not exist/are not this user's.
     """
-    
-    if sched_id is None:
-        return redirect('/')
 
     # Obtain all schedules for this user (to pass to template)
     sched_list = Schedule.objects.filter(user=request.user)
@@ -105,30 +105,25 @@ def save(request):
     return JsonResponse({'status': 'saved', 'schedule': schedule.id}, status=200)
 
 @login_required
-@require_http_methods(["GET", "DELETE"])
-def delete(request):
+def delete(request, sched_id):
     """
     Deletes the schedule with the passed ID, provided
     it exists and is owned by the requesting user. 
     """
-
-    id = request.GET.get('id')
-    if not id:
-        return HttpResponseBadRequest('No schedule ID provided')
-    
+    # Grab schedule object from DB
     try: 
-        schedule = Schedule.objects.filter(user=request.user).get(id=id)
+        schedule = Schedule.objects.filter(user=request.user).get(id=sched_id)
     except Schedule.DoesNotExist:
         return HttpResponseBadRequest('Schedule not found')
     
-    schedule.delete()
+    # Delete schedule from DB
+    try: 
+        schedule.delete()
+    except Exception as e:
+        return HttpResponseServerError('Error deleting schedule' + str(e))
     
-    # Handles requests to delete the schedule a user is currently viewing
-    if request.method == 'GET':
-        return redirect('/')
-    else:
-        # For async fetch requests from within the page
-        return HttpResponse(status=204)
+    # Confirm successful deletion
+    return HttpResponse(status=204)
 
 @login_required
 @require_http_methods(["POST"])

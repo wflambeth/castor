@@ -38,7 +38,7 @@ function delete_schedule(event) {
     event.preventDefault();
     const id = event.target.getAttribute('data-delete-id');
     const request = new Request(
-        paths.delete + "?id=" + id,
+        "/schedule" + '/' + id,
         {headers: 
             {'X-CSRFToken': csrftoken,
              'Content-Type': 'application/json'},
@@ -49,14 +49,19 @@ function delete_schedule(event) {
     fetch(request)
         .then(function (response) {
             if (response.status === 204) {
-                // removes item from DOM if removal is successful
-                document.getElementById(id + '_parent').remove();
                 return 'Schedule ' + id + ' deleted';
             } else { return Promise.reject(response); }
         })
         .then(function (msg) {
-            // TODO: add messaging for successful/errored deletion
+            // log that schedule was deleted
             console.log(msg);
+            if (page_sched_id == id) {
+                // if current schedule was deleted, load index
+                window.open("/", "_self");
+            } else {
+                // otherwise, remove schedule from sidebar
+                document.getElementById(id + '_parent').remove();
+            }
         })
         .catch(function (err) {
             console.error(err);
