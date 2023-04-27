@@ -54,7 +54,7 @@
                 {% if sched.id == sched_id %}
                 <span>{{ sched.name }} <a id="delete-current" href="{% url 'delete' %}?id={{ sched.id }}">[x]</a></span>
                 {% else %}
-                <span><a href="{% url 'index' %}?id={{ sched.id }}">{{ sched.name }}</a> <a
+                <span><a href="{% url 'index' %}{{ sched.id }}">{{ sched.name }}</a> <a
                         data-delete-id="{{ sched.id }}" class="delete-sched" href="#">[x]</a></span>
                 {% endif %}
             </div>

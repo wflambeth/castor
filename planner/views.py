@@ -49,6 +49,18 @@ def index(request):
     return render(request, 'planner/index.html', context)
 
 @login_required
+def router(request, sched_id):
+    if request.method == 'GET':
+        return schedule(request, sched_id)
+    elif request.method == 'DELETE':
+        return delete(request, sched_id)
+    elif request.method == 'PATCH':
+        # check if form included is a title update or schedule body update
+        # call appropriate handler
+        pass
+
+
+@login_required
 @require_safe
 def schedule(request, sched_id):
     """
