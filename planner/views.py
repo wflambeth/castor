@@ -14,9 +14,8 @@ MAX_SCHEDULES = 10
 @require_safe
 def index(request):
     """
-    Takes requests to index URL ("/"), and redirects to a scheduler page ("/:id"). 
     Loads a demo page if user is unauthenticated. 
-    Creates a schedule for the user if none exists. 
+    If user is authenticated, redirects to their most recent schedule.
     """
 
     # If user is logged out, show 'demo' schedule
@@ -25,11 +24,10 @@ def index(request):
 
     # Check for existing schedules for this user
     sched_list = Schedule.objects.filter(user=request.user)
-    # Load most recently created, if possible
+    # Load most recently created, if possible...
     if sched_list.exists():
         schedule = sched_list.last()
-    
-    # If they have no schedules, create one and display it
+    # ...or if they have no schedules, create new one
     else:
         try:
             schedule = sl.new(request.user)
@@ -37,49 +35,8 @@ def index(request):
         except:
             return HttpResponseServerError('Error creating new schedule')    
 
-    # Redirect to the schedule's index page
+    # Display the schedule in question
     return redirect(f'schedule/{schedule.id}')
-
-@login_required
-def router(request, sched_id):
-    """
-    Handles requests to schedule pages ("/:id").
-    Dispatches to a handler based on request method.
-    """
-    if sched_id is None:
-        return redirect('/')
-    
-    if request.method == 'GET':
-        return display(request, sched_id)
-    elif request.method == 'DELETE':
-        return delete(request, sched_id)
-    elif request.method == 'POST':
-        return update_title(request)
-    elif request.method == 'PATCH':
-        return update_schedule(request)
-    else:
-        return HttpResponseNotAllowed(['GET', 'POST', 'DELETE', 'PATCH'])
-
-
-@login_required
-@require_safe
-def display(request, sched_id):
-    """
-    Displays a specific schedule page ("/:id").
-    """
-
-    # Obtain all schedules for this user (to pass to template)
-    sched_list = Schedule.objects.filter(user=request.user)
-
-    # Pull requested schedule using ID and user
-    try:
-        schedule = sched_list.get(id=sched_id)
-    except Schedule.DoesNotExist:
-        return HttpResponseBadRequest('Schedule not found')
-
-    # Load context and render template
-    context = sl.existing(schedule, request.user, sched_list)
-    return render(request, 'planner/index.html', context)
 
 @login_required
 @require_http_methods(["GET","POST"])
@@ -107,6 +64,45 @@ def create(request):
 
     return JsonResponse({'msg': 'Schedule created', 'schedule': schedule.id}, status=200)
 
+@login_required
+def router(request, sched_id):
+    """
+    Handles requests to schedule pages ("/:id").
+    Dispatches to a handler based on request method.
+    """
+    if sched_id is None:
+        return redirect('/')
+    
+    if request.method == 'GET':
+        return display(request, sched_id)
+    elif request.method == 'DELETE':
+        return delete(request, sched_id)
+    elif request.method == 'POST':
+        return update_title(request)
+    elif request.method == 'PATCH':
+        return update_schedule(request)
+    else:
+        return HttpResponseNotAllowed(['GET', 'POST', 'DELETE', 'PATCH'])
+
+
+def display(request, sched_id):
+    """
+    Displays a specific schedule page ("/:id").
+    """
+
+    # Obtain all schedules for this user (to pass to template)
+    sched_list = Schedule.objects.filter(user=request.user)
+
+    # Pull requested schedule using ID and user
+    try:
+        schedule = sched_list.get(id=sched_id)
+    except Schedule.DoesNotExist:
+        return HttpResponseBadRequest('Schedule not found')
+
+    # Load context and render template
+    context = sl.existing(schedule, request.user, sched_list)
+    return render(request, 'planner/index.html', context)
+
 def update_schedule(request): 
     """
     Saves updates to schedule (dates, courses scheduled).
@@ -121,7 +117,6 @@ def update_schedule(request):
     su.update(schedule, data['courses'], data['dates'])
     return JsonResponse({'status': 'saved', 'schedule': schedule.id}, status=200)
 
-@login_required
 def delete(request, sched_id):
     """
     Deletes a schedule from the database.
