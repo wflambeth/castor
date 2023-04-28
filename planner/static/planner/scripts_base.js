@@ -18,7 +18,7 @@ var drake = dragula({
     This is true if the course is offered that quarter, and if all prereqs have been 
     scheduled previously. 
     */
-    if (POST_changes['s'] !== 'NULL') { // TODO: Hack to avoid issues with logged-out demo page; remove
+    if (changes['s'] !== 'NULL') { // TODO: Hack to avoid issues with logged-out demo page; remove
       // course containers always accept their children back to them
       let target_id = target.getAttribute('id');
       let required = el.getAttribute('data-req') === 'true' ? true : false;
@@ -61,7 +61,8 @@ function dropLogger(el, target, source, sibling) {
     let id = el.getAttribute('data-id');
     let year = target.getAttribute('data-yr');
     let qtr = target.getAttribute('data-qtr');
-    POST_changes.courses[id] = { year, qtr };
+    changes.courses[id] = { year, qtr };
+    console.log(changes)
 
     // Remove placeholder from newly-nonempty container
     let placeholder = target.getElementsByClassName('placeholder')[0];
@@ -238,8 +239,8 @@ document.getElementById('add_qtr_before').addEventListener("click", (event) => {
   }
 
   // Update schedule bounds to be saved to DB
-  POST_changes.dates.start.year = yr;
-  POST_changes.dates.start.qtr = qtr;
+  changes.dates.start.year = yr;
+  changes.dates.start.qtr = qtr;
 
   // Increment course indices
   for (const [key, value] of Object.entries(crs_idx)){
@@ -277,9 +278,9 @@ document.getElementById('add_qtr_after').addEventListener("click", (event) => {
   
 
   // Update schedule bounds to be saved to DB
-  POST_changes.dates.end.year = yr;
-  POST_changes.dates.end.qtr = qtr;
-  console.log(POST_changes);
+  changes.dates.end.year = yr;
+  changes.dates.end.qtr = qtr;
+  console.log(changes);
 });
 
 // hide delete buttons for non-empty and non-edge terms 
@@ -318,8 +319,8 @@ function update_qtrs (event) {
           first.children[0].children[1].hidden = false;
 
           // update save state with new bounds
-          POST_changes.dates.start.year = first.getAttribute('data-yr');
-          POST_changes.dates.start.qtr = first.getAttribute('data-qtr');
+          changes.dates.start.year = first.getAttribute('data-yr');
+          changes.dates.start.qtr = first.getAttribute('data-qtr');
 
           // Decrement course indices
           for (const [key, value] of Object.entries(crs_idx)){
@@ -336,8 +337,8 @@ function update_qtrs (event) {
           last.children[0].children[1].hidden = false;
 
           // update save state with new bounds
-          POST_changes.dates.end.year = last.getAttribute('data-yr');
-          POST_changes.dates.end.qtr = last.getAttribute('data-qtr');
+          changes.dates.end.year = last.getAttribute('data-yr');
+          changes.dates.end.qtr = last.getAttribute('data-qtr');
       }
   } else {
       /* If container has courses within it, we keep the container
@@ -356,7 +357,7 @@ function update_qtrs (event) {
           }
           // update save state object, index for dragging validation
           let crs_id = crs.getAttribute('data-id');
-          POST_changes.courses[crs_id] = {year: null, qtr: null};
+          changes.courses[crs_id] = {year: null, qtr: null};
           crs_idx[crs_id] = -1;
       }
       // Add placeholder element

@@ -48,7 +48,7 @@ def router(request, sched_id):
     """
     if sched_id is None:
         return redirect('/')
-
+    
     if request.method == 'GET':
         return display(request, sched_id)
     elif request.method == 'DELETE':
@@ -56,8 +56,7 @@ def router(request, sched_id):
     elif request.method == 'POST':
         return update_title(request)
     elif request.method == 'PATCH':
-        #return save(request)
-        pass
+        return update_schedule(request)
     else:
         return HttpResponseNotAllowed(['GET', 'POST', 'DELETE', 'PATCH'])
 
@@ -108,9 +107,7 @@ def create(request):
 
     return JsonResponse({'msg': 'Schedule created', 'schedule': schedule.id}, status=200)
 
-@login_required
-@require_http_methods(["POST"])
-def save(request): 
+def update_schedule(request): 
     """
     Saves updates to schedule (dates, courses scheduled).
     Used by fetch requests within the index page JavaScript. 

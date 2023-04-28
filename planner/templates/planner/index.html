@@ -162,11 +162,7 @@
         </div>
         <script>
             const page_sched_id = {{ sched_id }};
-            const paths = {
-                save: "{% url 'save' %}",
-                update_title: "{% url 'update_title' %}",
-            }
-            const POST_changes = { 
+            const changes = { 
                 s: page_sched_id, 
                 courses: {}, 
                 dates: {

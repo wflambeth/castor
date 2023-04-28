@@ -33,25 +33,26 @@ if (create_btn !== null) { // (e.g. if max schedules not reached)
 
 function saveSchedule() {
     /* Saves any pending changes to the course schedule (dates, scheduled courses), by 
-       JSON-encoding the state object and sending to server POST endpoint. */
+       JSON-encoding the state object and sending to server PATCH endpoint. */
     const request = new Request(
-        paths.save,
+        "/schedule" + '/' + page_sched_id,
         {headers: {'X-CSRFToken': csrftoken,
                    'Content-Type': 'application/json'}, 
-         body: JSON.stringify(POST_changes),
-         method: 'POST',
+         body: JSON.stringify(changes),
+         method: 'PATCH',
          mode: 'same-origin'
     });
     
     fetch(request)
         .then((response) => response.json())
         .then((data) => {
-            // clear state object after successful save
-            POST_changes.courses = {}; 
-            POST_changes.dates.start = {qtr: null, year: null};
-            POST_changes.dates.end = {qtr: null, year: null};
             // report success. TODO: make this visible in UI
-            console.log('Success: ', data);
+            console.log('Saved: ', data);
+
+            // clear state object after saving
+            changes.courses = {}; 
+            changes.dates.start = {qtr: null, year: null};
+            changes.dates.end = {qtr: null, year: null};
         })
         .catch((error) => {
             console.error('Error saving schedule: ', error);
