@@ -22,7 +22,7 @@ function createSchedule() {
         })
         .catch((error) => {
             // log error if schedule creation fails
-            console.log('Error creating schedule:', error);
+            console.error('Error creating schedule: ', error);
         });
 }
 
@@ -54,7 +54,7 @@ function saveSchedule() {
             console.log('Success: ', data);
         })
         .catch((error) => {
-            console.log('Error saving schedule:', error);
+            console.error('Error saving schedule: ', error);
         });
 }
 
@@ -96,8 +96,8 @@ function delete_schedule(event) {
                 }
             }
         })
-        .catch(function (err) {
-            console.error(err);
+        .catch((error) => {
+            console.error('Error deleting schedule: ', error);
         });
 }
 
