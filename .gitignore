@@ -92,3 +92,6 @@ data_dump.json
 mydegrees*
 rawclassinfo.txt
 sprintnotes.txt
+.vscode
+planner/static/planner/dragula*
+staticfiles/
