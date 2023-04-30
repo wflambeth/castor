@@ -1,4 +1,5 @@
-import json, requests
+import json
+import requests
 from string import capwords
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -85,9 +86,10 @@ class Command(BaseCommand):
 
         # Iterate over DB vs scraped courses and compare
         i = j = 0
-        l = max(len(scraped_courses), len(db_courses))
+        course_ct = max(len(scraped_courses), len(db_courses))
         issue_ct = 0
-        while i < l and j < l:
+
+        while i < course_ct and j < course_ct:
             # Ensure that course numbers are same
             if scraped_courses[i].course_number != db_courses[j]['course_number']:
                 # If scraped course is not yet in DB, log and iterate past
@@ -128,7 +130,8 @@ class Command(BaseCommand):
             j += 1
         
         # Print completion message and count of errors found
-        self.stdout.write("**********SCRAPING COMPLETED. " + str(issue_ct) + " ISSUE(S) FOUND**********")
+        self.stdout.write("**********SCRAPING COMPLETED. " + 
+                          str(issue_ct) + " ISSUE(S) FOUND**********")
 
 
 @define
@@ -209,7 +212,7 @@ class CourseInfo:
 
     @classmethod 
     def extract_prereqs(self, offerings):
-        """Builds a table of prerequisite
+        """Builds a table of prerequisites  
 
         """
         prereqs = []
