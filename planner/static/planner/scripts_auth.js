@@ -15,7 +15,10 @@ function createSchedule() {
         });
 
     fetch(request)
-        .then((response) => response.json())
+        .then((response) => {
+            // raise error if response code is not 2XX
+            if (response.ok) return response.json();
+            return response.json().then(response => {throw new Error(response.error)})})
         .then((data) => {
             // redirect to new schedule
             window.open("/schedules/" + data.schedule, "_self");
@@ -44,7 +47,10 @@ function saveSchedule() {
     });
     
     fetch(request)
-        .then((response) => response.json())
+        .then((response) => {
+            // raise error if response code is not 2XX
+            if (response.ok) return response.json();
+            return response.json().then(response => {throw new Error(response.error)})})
         .then((data) => {
             // report success. TODO: make this visible in UI
             console.log('Saved: ', data);

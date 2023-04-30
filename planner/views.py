@@ -116,7 +116,12 @@ def update_schedule(request):
     except Schedule.DoesNotExist:
         return HttpResponseBadRequest('Schedule not found')
     
-    su.update(schedule, data['courses'], data['dates'])
+    try:
+        su.update(schedule, data['courses'], data['dates'])
+    except Exception as e:
+        print("Error saving schedule updates", e)
+        return JsonResponse({'status': 'failed', 'schedule': schedule.id}, status=500)
+
     return JsonResponse({'status': 'saved', 'schedule': schedule.id}, status=200)
 
 def delete(request, sched_id):
