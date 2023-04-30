@@ -13,9 +13,10 @@ MAX_USER_SCHEDULES = 10
 
 @require_safe
 def index(request):
-    """
-    Loads a demo page if user is unauthenticated. 
-    If user is authenticated, redirects to their most recent schedule.
+    """Handles requests to the index page ("/").
+    
+    If user is logged in, displays their most recently created schedule. 
+    If user is logged out, displays a demo schedule.
     """
 
     # If user is logged out, show 'demo' schedule
@@ -42,12 +43,19 @@ def index(request):
 @login_required
 @require_http_methods(["GET","POST"])
 def create(request):
-    """
-    Creates a new schedule, when requested via POST.
-    Requires no contents in request body.
+    """Handles requests to create a new schedule ("/schedules").
+
+    Intended to handle POST requests; GET requests assumed to 
+    be accidental and redirected to "/".
+
+    Args:
+        request: XHR POST request from index page JS
+    
+    Returns:
+        JSON response with new schedule ID or error message
     """
 
-    # if (accidental) GET request, redirect to index view
+    # if GET request, redirect to index view
     if request.method == 'GET':
         return redirect('/')
 
@@ -68,28 +76,32 @@ def create(request):
 
 @login_required
 def sched_router(request, sched_id):
-    """
-    Handles requests to schedule pages ("/:id").
-    Dispatches to a handler based on request method.
+    """Handles requests to a specific schedule ("/schedules/:id").
+
+    Routes to appropriate view function based on request method.
     """
     if sched_id is None:
         return redirect('/')
     
     if request.method == 'GET':
+        # Show schedule
         return display(request, sched_id)
     elif request.method == 'DELETE':
+        # Delete schedule
         return delete(request, sched_id)
     elif request.method == 'POST':
+        # Update schedule title
         return update_title(request)
     elif request.method == 'PATCH':
+        # Update schedule contents
         return update_schedule(request)
     else:
         return HttpResponseNotAllowed(['GET', 'POST', 'DELETE', 'PATCH'])
 
 
 def display(request, sched_id):
-    """
-    Displays a specific schedule page ("/:id").
+    """Displays schedule viewer/editor page for a given schedule,
+       upon GET request.
     """
 
     # Obtain all schedules for this user (to pass to template)
@@ -106,9 +118,15 @@ def display(request, sched_id):
     return render(request, 'planner/index.html', context)
 
 def update_schedule(request): 
-    """
-    Saves updates to schedule (dates, courses scheduled).
-    Used by fetch requests within the index page JavaScript. 
+    """ Handles requests to update a schedule's contents.
+
+    Args:
+        request: XHR PATCH request from index page JS, including
+                 JSON list of courses and terms to update
+
+    Returns:
+        JSON response with status and schedule ID
+
     """
     data = json.loads(request.body)
     try:
@@ -125,8 +143,14 @@ def update_schedule(request):
     return JsonResponse({'status': 'saved', 'schedule': schedule.id}, status=200)
 
 def delete(request, sched_id):
-    """
-    Deletes a schedule from the database.
+    """Deletes a given schedule from the database.
+
+    Args:
+        request: XHR DELETE request from index page JS
+    
+    Returns:
+        JSON response with status of deletion
+
     """
     # Grab schedule object from DB
     try: 
@@ -144,8 +168,16 @@ def delete(request, sched_id):
     return HttpResponse(status=204)
 
 def update_title(request):
-    """
-    Updates the title of a given schedule. 
+    """Updates the title of a given schedule.
+
+    Args:
+        request: XHR POST request from index page JS, including
+                 Django form object
+    
+    Returns:
+        Redirect to index page with updated schedule ID, 
+        or HTTP error code if invalid form/DB error
+
     """
     form = TitleForm(request.POST)
 
