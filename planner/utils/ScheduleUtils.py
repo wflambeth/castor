@@ -1,5 +1,5 @@
 
-from planner.models import Course, Schedule, Course_Schedule, Prereq
+from planner.models import Course, User, Schedule, Course_Schedule, Prereq
 from planner.forms import TitleForm
 from datetime import datetime
 
@@ -14,7 +14,7 @@ class ScheduleLoader:
         existing: loads an existing schedule from DB, along with rendering context
     """
 
-    def demo(self):
+    def demo(self) -> dict:
         """ Creates and returns rendering context for demo scheduler page.
 
         Called by planner/views.py/index().
@@ -49,7 +49,7 @@ class ScheduleLoader:
 
         return context
 
-    def new(self, user):
+    def new(self, user: User) -> Schedule:
         """Builds new schedule object owned by the provided User.
 
         Called by planner/views.py/create(). Does not save schedule to DB;
@@ -75,7 +75,7 @@ class ScheduleLoader:
         return schedule
 
 
-    def existing(self, schedule, user, sched_list):
+    def existing(self, schedule: Schedule, user: User, sched_list: any) -> dict:
         """Loads an existing schedule from DB, along with rendering context.
 
         Called by planner/views.py/display().
@@ -137,7 +137,7 @@ class ScheduleLoader:
         return context
 
 
-    def _data_context_builder(self):
+    def _data_context_builder(self) -> tuple[dict, dict, dict]:
         """ Used by new() and existing() to build context for rendering page.
         
         Stores information on course prereqs and quarters offered, for use 
@@ -171,7 +171,7 @@ class ScheduleUpdater:
         update: updates a schedule's contents in the database
     """
 
-    def update(self, schedule, courses, dates):
+    def update(self, schedule: Schedule, courses: list[int], dates: dict[dict]) -> None:
         """ Updates a schedule's contents in the database.
 
         Called by planner/views.py/update_schedule(). Parses JSON data from
@@ -179,13 +179,13 @@ class ScheduleUpdater:
         Only changes to previously saved schedule are included in request.
 
         Args:
-            schedule: ORM Schedule object to be updated
-            courses: JSON list of courses to be updated
-            dates: JSON representing schedule start/end dates
+            schedule: Schedule object to be updated
+            courses: list of courses to be updated
+            dates: dict representing schedule start/end dates
 
-        Returns:
-            None (updates DB directly. Raises exception if error encountered)
-
+            dates structure:
+                {start: {'year': int,'qtr': int },
+                 end:   {'year': int,'qtr': int }}
         """
 
         # Update schedule start dates (if modified)
