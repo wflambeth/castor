@@ -177,10 +177,15 @@ LOGGING = {
             'filename': os.environ.get('LOGGING_URL', '/code/castor/castor.log'),
             'formatter': 'verbose'
         },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        }
     },
     'loggers': {
         'django': {
-            'handlers':['file'],
+            'handlers':['file', 'console'],
             'propagate': True,
             'level':'DEBUG',
         },
