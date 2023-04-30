@@ -143,8 +143,11 @@ def data_context_builder():
     offered_qtrs = {}
     indices = {}
     for course in Course.objects.all():
-        prereqs[course.course_number] = [prereq.prereq.course_number for prereq in Prereq.objects.filter(course=course)]
-        offered_qtrs[course.course_number] = course.qtrs
-        indices[course.course_number] = -1 
+        crs_num = course.course_number
+
+        prereqs[crs_num] = [prereq.prereq.course_number for \
+                            prereq in Prereq.objects.filter(course=course)]
+        offered_qtrs[crs_num] = course.qtrs
+        indices[crs_num] = -1 
 
     return prereqs, offered_qtrs, indices
