@@ -48,7 +48,7 @@ class Schedule(models.Model):
         FALL = 3
 
     user = models.ForeignKey('User', on_delete=models.CASCADE)
-    name = models.CharField(max_length=100, default="My new schedule") # not enforcing uniqueness on this for now
+    name = models.CharField(max_length=100, default="My new schedule")
     start_qtr = models.PositiveSmallIntegerField(choices=Quarter.choices)
     end_qtr = models.PositiveSmallIntegerField(choices=Quarter.choices)
     start_year = models.PositiveSmallIntegerField() 
@@ -71,12 +71,14 @@ class Course_Schedule(models.Model):
     qtr = models.PositiveSmallIntegerField(choices=Schedule.Quarter.choices)
 
     constraints = [
-        models.UniqueConstraint(fields=['schedule', 'course'], name='unique_class_instance_per_schedule')
+        models.UniqueConstraint(fields=['schedule', 'course'], 
+                                name='unique_class_instance_per_schedule')
         # TODO: add check constraint for year/qtr within schedule bounds
     ]
 
     def __str__(self):
-        return str(self.schedule) + " - " + str(self.course.course_number) + " (" + str(self.qtr) + " " + str(self.year) + ")"
+        return str(self.schedule) + " - " + str(self.course.course_number) + \
+                " (" + str(self.qtr) + " " + str(self.year) + ")"
 
 # Table capturing M:M relationship between Courses and their prerequisite Courses
 class Prereq(models.Model):
@@ -84,4 +86,5 @@ class Prereq(models.Model):
     prereq = models.ForeignKey('Course', related_name='prereq', on_delete=models.CASCADE)
 
     def __str__(self):
-        return "CS " + str(self.course.course_number) + " :: CS " + str(self.prereq.course_number)
+        return "CS " + str(self.course.course_number) + \
+               " :: CS " + str(self.prereq.course_number)

@@ -2,11 +2,11 @@ import json
 import planner.utils.schedloader as sl
 import planner.utils.schedupdater as su
 from django.shortcuts import HttpResponse, render, redirect
-from django.template import loader
-from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequest, HttpResponseServerError, HttpResponseNotAllowed
+from django.http import JsonResponse, HttpResponseBadRequest,\
+                        HttpResponseServerError, HttpResponseNotAllowed
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_safe
-from planner.models import Course, Schedule, Course_Schedule, Prereq
+from planner.models import Schedule
 from planner.forms import TitleForm
 
 MAX_SCHEDULES = 10
@@ -32,7 +32,8 @@ def index(request):
         try:
             schedule = sl.new(request.user)
             schedule.save()
-        except:
+        except Exception as e:
+            print(e) # TODO: turn this into a logging statement
             return HttpResponseServerError('Error creating new schedule')    
 
     # Display the schedule in question
@@ -59,10 +60,11 @@ def create(request):
     try:
         schedule = sl.new(request.user)
         schedule.save()
-    except:
+    except Exception as e:
+        print(e) # TODO: turn this into a logging statement
         return JsonResponse({'msg': 'Error creating schedule'}, status=500)
 
-    return JsonResponse({'msg': 'Schedule created', 'schedule': schedule.id}, status=200)
+    return JsonResponse({'msg': 'Schedule created', 'schedule': schedule.id},status=200)
 
 @login_required
 def router(request, sched_id):
@@ -159,7 +161,8 @@ def update_title(request):
     schedule.name = title
     try:
         schedule.save()
-    except:
+    except Exception as e:
+        print(e) # TODO: turn this into a logging statement
         return HttpResponseServerError('Error saving schedule')
     
     return redirect(f'/?id={schedule.id}')
