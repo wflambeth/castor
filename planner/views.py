@@ -1,6 +1,5 @@
 import json
-import planner.utils.schedloader as sl
-import planner.utils.schedupdater as su
+from planner.utils.ScheduleUtils import ScheduleLoader, ScheduleUpdater
 from django.shortcuts import HttpResponse, render, redirect
 from django.http import JsonResponse, HttpResponseBadRequest,\
                         HttpResponseServerError, HttpResponseNotAllowed
@@ -18,6 +17,7 @@ def index(request):
     If user is logged in, displays their most recently created schedule. 
     If user is logged out, displays a demo schedule.
     """
+    sl = ScheduleLoader()
 
     # If user is logged out, show 'demo' schedule
     if not request.user.is_authenticated:
@@ -54,6 +54,7 @@ def create(request):
     Returns:
         JSON response with new schedule ID or error message
     """
+    sl = ScheduleLoader()
 
     # if GET request, redirect to index view
     if request.method == 'GET':
@@ -103,6 +104,7 @@ def display(request, sched_id):
     """Displays schedule viewer/editor page for a given schedule,
        upon GET request.
     """
+    sl = ScheduleLoader()
 
     # Obtain all schedules for this user (to pass to template)
     sched_list = Schedule.objects.filter(user=request.user)
@@ -128,6 +130,8 @@ def update_schedule(request):
         JSON response with status and schedule ID
 
     """
+    su = ScheduleUpdater()
+
     data = json.loads(request.body)
     try:
         schedule = Schedule.objects.filter(user=request.user).get(id=int(data['s']))
