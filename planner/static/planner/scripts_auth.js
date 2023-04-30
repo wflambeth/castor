@@ -7,7 +7,7 @@ Scripts for auth-only functions (creating/saving/deleting schedules, updating sc
 function createSchedule() {
     /* Creates a new schedule on request, then redirects to that schedule's page. */
     const request = new Request(
-        "/schedule",
+        "/schedules",
         {headers: {'X-CSRFToken': csrftoken,
                      'Accept': 'application/json'},
             method: 'POST',
@@ -18,7 +18,7 @@ function createSchedule() {
         .then((response) => response.json())
         .then((data) => {
             // redirect to new schedule
-            window.open("/schedule/" + data.schedule, "_self");
+            window.open("/schedules/" + data.schedule, "_self");
         })
         .catch((error) => {
             // log error if schedule creation fails
@@ -35,7 +35,7 @@ function saveSchedule() {
     /* Saves any pending changes to the course schedule (dates, scheduled courses), by 
        JSON-encoding the state object and sending to server PATCH endpoint. */
     const request = new Request(
-        "/schedule" + '/' + page_sched_id,
+        "/schedules" + '/' + page_sched_id,
         {headers: {'X-CSRFToken': csrftoken,
                    'Content-Type': 'application/json'}, 
          body: JSON.stringify(changes),
@@ -67,7 +67,7 @@ function delete_schedule(event) {
     event.preventDefault();
     const id = event.target.getAttribute('data-delete-id');
     const request = new Request(
-        "/schedule" + '/' + id,
+        "/schedules" + '/' + id,
         {headers: 
             {'X-CSRFToken': csrftoken,
              'Content-Type': 'application/json'},

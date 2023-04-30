@@ -37,7 +37,7 @@ def index(request):
             return HttpResponseServerError('Error creating new schedule')    
 
     # Display the schedule in question
-    return redirect(f'schedule/{schedule.id}')
+    return redirect(f'schedules/{schedule.id}')
 
 @login_required
 @require_http_methods(["GET","POST"])
@@ -67,7 +67,7 @@ def create(request):
     return JsonResponse({'msg': 'Schedule created', 'schedule': schedule.id},status=200)
 
 @login_required
-def router(request, sched_id):
+def sched_router(request, sched_id):
     """
     Handles requests to schedule pages ("/:id").
     Dispatches to a handler based on request method.
