@@ -1,13 +1,13 @@
 import json
 import requests
+import logging
 from string import capwords
-from datetime import datetime
-from zoneinfo import ZoneInfo
 from attrs import define, field, asdict
 from bs4 import BeautifulSoup, Comment
 from django.core.management.base import BaseCommand
 from planner.models import Course, Prereq
 
+logger = logging.getLogger(__name__)
 
 @define
 class CourseInfo:
@@ -244,9 +244,9 @@ class Command(BaseCommand):
             db_val: The value of the field in the DB
             scraped_val: The value of the field in the scraped JSON
         """
-        self.stdout.write(str(course) + ' ' + " has changed " + str(key).upper())
-        self.stdout.write("DB     : " + str(db_val))
-        self.stdout.write("Scraped: " + str(scraped_val) + '\n\n')        
+        logger.warning(str(course) + ' ' + " has changed " + str(key).upper())
+        logger.warning("DB     : " + str(db_val))
+        logger.warning("Scraped: " + str(scraped_val) + '\n\n')        
     
     def handle(self, *args, **options) -> None:
         """Method for running scrape, called via 'python manage.py scrape' 
@@ -255,9 +255,7 @@ class Command(BaseCommand):
         Arguments are required per Django syntax, but are unused.        
         """
         # Begin logging output, with timestamp
-        self.stdout.write("********** SCRAPING ECAMPUS CATALOG **********")
-        dt = datetime.now(ZoneInfo('US/Pacific'))
-        self.stdout.write(dt.strftime("%Y-%m-%d %H:%M:%S") + " Pacific" + '\n\n')
+        logger.info("SCRAPING ECAMPUS CATALOG")
 
         # Scrape course data from JSON, load into memory
         course_json = self._scrape_json()
@@ -280,7 +278,7 @@ class Command(BaseCommand):
             if scraped_courses[i].course_number != db_courses[j]['course_number']:
                 # If scraped course is not yet in DB, log and iterate past
                 if scraped_courses[i].course_number < db_courses[j]['course_number']:
-                    self.stdout.write("NEW COURSE: " + 
+                    logger.warning("NEW COURSE: " + 
                                       str(scraped_courses[i].course_number) + 
                                       ' ' + scraped_courses[i].title + '\n\n')
                     i += 1
@@ -288,7 +286,7 @@ class Command(BaseCommand):
                     continue
                 # If DB course is missing from scrape, log and iterate past
                 else:
-                    self.stdout.write("STALE COURSE: " + 
+                    logger.warning("STALE COURSE: " + 
                                       str(db_courses[j]['course_number']) + 
                                       ' ' +  db_courses[j]['title'] + '\n\n')
                     j += 1
@@ -316,6 +314,9 @@ class Command(BaseCommand):
             j += 1
         
         # Print completion message and # of mismatches found
-        self.stdout.write("**********SCRAPING COMPLETED. " + 
-                          str(issue_ct) + " ISSUE(S) FOUND**********")
+        if issue_ct == 0:
+            logger.info("SCRAPING COMPLETED. NO ISSUES FOUND")
+        else:
+            logger.warning("SCRAPING COMPLETED. " + 
+                          str(issue_ct) + " ISSUE(S) FOUND")
 
