@@ -10,6 +10,159 @@ from planner.models import Course, Prereq
 
 # URL and start snippet for locating course JSON
 
+@define
+class CourseInfo:
+    """Dataclass for converting/validatingstoring scraped course data.
+
+    Uses the attrs package to extend builtin dataclass functionality.
+
+    Public methods (class methods):
+        CourseInfo.from_scraped() - Builds CourseInfo instance from scraped course data
+        CourseInfo.is_valid_postbac_course() - Checks if course is valid for postbac track
+        CourseInfo.extract_prereqs() - Extracts valid prereqs from scraped prereq data
+    
+    """
+    # List of courses to ignore when scraping (not applicable to postbac track)
+    FOUR_YEAR_ONLY = [101, 151, 165, 175, 201, 461, 462, 463]
+    # For translating course quarter codes into DB representation
+    QTRS = {'W': 0, 'Sp': 1, 'Su': 2, 'F': 3}
+
+    def _normalize_title(title: str) -> str:
+        """Intake formatter for course titles. 
+
+        Args:
+            title: A string extracted from raw scraped JSON
+        
+        Returns:
+            The same string, with capitalization corrected and 
+            leading characters stripped. 
+
+        """
+        # Strip leading non-alnum chars
+        i = 0
+        while not title[i].isalnum():
+            i += 1
+        if i > 0:
+            title = title[i:]
+
+        title = capwords(title)
+        # This avoids titles like "Software Engineering Ii"
+        if title[-2:] == 'Ii':
+            return title[:-1] + "I"
+        
+        return title
+    
+    def _normalize_credits(credits: str) -> int:
+        """Intake formatter for course credits.
+
+        Args:
+            credits: A course number extracted from scraped data
+        
+        Returns:
+            An int representing the number of credits for the course
+            (If credits are variable, returns the minimum number of credits)
+        
+        """
+        try:
+            return int(credits)
+        except ValueError:
+            return int(credits[0])
+        
+    # Data field: Course number
+    course_number: int = field(converter=int)
+    
+    # Data field: Course title
+    title: str = field(converter=_normalize_title)
+
+    # Data field: No. of Credits
+    credits: int = field(converter=_normalize_credits)
+
+    # Data field: Quarters offered
+    qtrs: list[int] = field(converter=lambda x: sorted(list(set(x))))
+
+    # Data field: Prerequisites
+    prereqs: list[int] = field(converter=lambda x: sorted(list(set(x))))
+
+    @classmethod
+    def is_valid_postbac_course(self, course_number: int) -> bool:
+        """Checks if course is valid for postbac track.
+
+        Args:
+            course_number: The course number of the course in question
+
+        Returns:
+            Boolean indicating valid/invalid course
+
+        """
+
+        # Ignore honors courses (not postbac; have trailing 'H')
+        try:
+            course_number = int(course_number)
+        except ValueError:
+            return False
+
+        # Ignore four-year degree courses
+        if course_number in self.FOUR_YEAR_ONLY:
+            return False
+        # Ignore graduate-level courses
+        elif course_number > 499:
+            return False
+        else:
+            return True
+
+    @classmethod 
+    def extract_prereqs(self, offerings: list[dict]) -> list[int]:
+        """Extracts valid prereqs from scraped prereq data.
+
+        Iterates over the prereq object scraped for a given course, 
+        ignoring invalid data (non-postbac courses, non-course entities)
+
+        Attrs:
+            offerings: A list of dicts, each containing course data
+        
+        Returns:
+            A list of valid prereq course numbers for that course
+
+        """
+        prereqs = []
+        for offering in offerings:
+            # Avoids issues with non-course entities (e.g. placement tests)
+            if 'Prereqs' in offering:
+                prq_list = offering['Prereqs']['CoursePrereq']
+                # wraps single-item results in a list for formatting consistency
+                if type(prq_list) is dict:
+                    prq_list = [prq_list]
+
+                for prq in prq_list:
+                    # Ensures prereq is also a valid postbac course
+                    if ('PrereqSubjectCode' in prq and prq['PrereqSubjectCode'] == 'CS' and 
+                        self.is_valid_postbac_course(prq['PrereqCourseNumber'])):
+                        # if so, append to output list
+                        prereqs.append(int(prq['PrereqCourseNumber']))
+
+        return prereqs
+
+    # Pulls course data from an array of course offerings (in JSON scraped from catalog)
+    @classmethod
+    def from_scraped(self, offerings: list[dict]) -> 'CourseInfo':
+        """Initializes a CourseInfo instance from scraped course data.
+
+        Args:
+            offerings: A list of dicts representing scraped course data for a given
+                       session. (Courses may have one or many sessions in catalog.)
+    
+        Returns:
+            A CourseInfo instance containing the course data for that course.
+
+        """
+        return CourseInfo(
+            course_number = offerings[0]['CourseNumber'],
+            qtrs = [ self.QTRS[offering['TermShortDescription'][:-2]] for offering in offerings ],
+            title = offerings[0]['Title'],
+            credits = offerings[0]['Credits'],
+            prereqs = CourseInfo.extract_prereqs(offerings)
+        )
+
 class Command(BaseCommand):
     """Contains methods for scraping course data from OSU's eCampus catalog.
 
@@ -21,7 +174,7 @@ class Command(BaseCommand):
     START = '[{"SubjectCode":"CS","CourseNumber":'
 
 
-    def _scrape_json(self):
+    def _scrape_json(self) -> str:
         """Locates and scrapes course info JSON from Ecampus catalog. 
 
         Takes:
@@ -38,7 +191,7 @@ class Command(BaseCommand):
             if self.START in comment:
                 return comment
     
-    def _build_scraped_courses(self, scraped_data):
+    def _build_scraped_courses(self, scraped_data: list[dict]) -> list[CourseInfo]:
         """Builds a list of CourseInfo dataclass instances from converted JSON.
 
         Args:
@@ -63,7 +216,7 @@ class Command(BaseCommand):
         
         return courses
     
-    def _build_db_prereq_list(self, course_number):
+    def _build_db_prereq_list(self, course_number: int) -> list[int]:
         """Builds prereq list from DB for a given course. 
 
         This is needed because prereqs are stored as FK:FK relations in their own
@@ -82,7 +235,8 @@ class Command(BaseCommand):
 
         return prereq_list
     
-    def _print_discrepancy(self, key, course, db_val, scraped_val):
+    def _print_discrepancy(self, key: str, course: int, db_val: int | str | list, \
+                           scraped_val: int | str | list) -> None:
         """Writes details of any DB-scrape inconsistencies to stdout.
 
         Args:
@@ -95,8 +249,11 @@ class Command(BaseCommand):
         self.stdout.write("DB     : " + str(db_val))
         self.stdout.write("Scraped: " + str(scraped_val) + '\n\n')        
     
-    def handle(self, *args, **options):
-        """
+    def handle(self, *args, **options) -> None:
+        """Method for running scrape, called via 'python manage.py scrape' 
+           from command line. 
+
+        Arguments are required per Django syntax, but are unused.        
         """
         # Begin logging output, with timestamp
         self.stdout.write("********** SCRAPING ECAMPUS CATALOG **********")
@@ -163,156 +320,3 @@ class Command(BaseCommand):
         self.stdout.write("**********SCRAPING COMPLETED. " + 
                           str(issue_ct) + " ISSUE(S) FOUND**********")
 
-
-@define
-class CourseInfo:
-    """Dataclass for converting/validatingstoring scraped course data.
-
-    Uses the attrs package to extend builtin dataclass functionality.
-
-    Public methods (class methods):
-        CourseInfo.from_scraped() - Builds CourseInfo instance from scraped course data
-        CourseInfo.is_valid_postbac_course() - Checks if course is valid for postbac track
-        CourseInfo.extract_prereqs() - Extracts valid prereqs from scraped prereq data
-    
-    """
-    # List of courses to ignore when scraping (not applicable to postbac track)
-    FOUR_YEAR_ONLY = [101, 151, 165, 175, 201, 461, 462, 463]
-    # For translating course quarter codes into DB representation
-    QTRS = {'W': 0, 'Sp': 1, 'Su': 2, 'F': 3}
-
-    def _normalize_title(title):
-        """Intake formatter for course titles. 
-
-        Args:
-            title: A string extracted from raw scraped JSON
-        
-        Returns:
-            The same string, with capitalization corrected and 
-            leading characters stripped. 
-
-        """
-        # Strip leading non-alnum chars
-        i = 0
-        while not title[i].isalnum():
-            i += 1
-        if i > 0:
-            title = title[i:]
-
-        title = capwords(title)
-        # This avoids titles like "Software Engineering Ii"
-        if title[-2:] == 'Ii':
-            return title[:-1] + "I"
-        
-        return title
-    
-    def _normalize_credits(credits):
-        """Intake formatter for course credits.
-
-        Args:
-            credits (string): A course number  extracted from scraped data
-        
-        Returns:
-            An int representing the number of credits for the course
-            (If credits are variable, returns the minimum number of credits)
-        
-        """
-        try:
-            return int(credits)
-        except ValueError:
-            return int(credits[0])
-        
-    # Data field: Course number
-    course_number: int = field(converter=int)
-    
-    # Data field: Course title
-    title: str = field(converter=_normalize_title)
-
-    # Data field: No. of Credits
-    credits: int = field(converter=_normalize_credits)
-
-    # Data field: Quarters offered
-    qtrs: list[int] = field(converter=lambda x: sorted(list(set(x))))
-
-    # Data field: Prerequisites
-    prereqs: list[int] = field(converter=lambda x: sorted(list(set(x))))
-
-    @classmethod
-    def is_valid_postbac_course(self, course_number):
-        """Checks if course is valid for postbac track.
-
-        Args:
-            course_number (int): The course number of the course in question
-
-        Returns:
-            Boolean indicating valid/invalid course
-
-        """
-
-        # Ignore honors courses (not postbac; have trailing 'H')
-        try:
-            course_number = int(course_number)
-        except ValueError:
-            return False
-
-        # Ignore four-year degree courses
-        if course_number in self.FOUR_YEAR_ONLY:
-            return False
-        # Ignore graduate-level courses
-        elif course_number > 499:
-            return False
-        else:
-            return True
-
-    @classmethod 
-    def extract_prereqs(self, offerings):
-        """Extracts valid prereqs from scraped prereq data.
-
-        Iterates over the prereq object scraped for a given course, 
-        ignoring invalid data (non-postbac courses, non-course entities)
-
-        Attrs:
-            offerings: A list of dicts, each containing course data
-        
-        Returns:
-            A list of valid prereq course numbers for that course
-
-        """
-        prereqs = []
-        for offering in offerings:
-            # Avoids issues with non-course entities (e.g. placement tests)
-            if 'Prereqs' in offering:
-                prq_list = offering['Prereqs']['CoursePrereq']
-                # wraps single-item results in a list for formatting consistency
-                if type(prq_list) is dict:
-                    prq_list = [prq_list]
-
-                for prq in prq_list:
-                    # Ensures prereq is also a valid postbac course
-                    if ('PrereqSubjectCode' in prq and prq['PrereqSubjectCode'] == 'CS' and 
-                        self.is_valid_postbac_course(prq['PrereqCourseNumber'])):
-                        # if so, append to output list
-                        prereqs.append(int(prq['PrereqCourseNumber']))
-
-        return prereqs
-
-    # Pulls course data from an array of course offerings (in JSON scraped from catalog)
-    @classmethod
-    def from_scraped(self, offerings):
-        """Initializes a CourseInfo instance from scraped course data.
-
-        Args:
-            offerings: A list of dicts representing scraped course data for a given
-                       session. (Courses may have one or many sessions in catalog.)
-    
-        Returns:
-            A CourseInfo instance containing the course data for that course.
-
-        """
-        return CourseInfo(
-            course_number = offerings[0]['CourseNumber'],
-            qtrs = [ self.QTRS[offering['TermShortDescription'][:-2]] for offering in offerings ],
-            title = offerings[0]['Title'],
-            credits = offerings[0]['Credits'],
-            prereqs = CourseInfo.extract_prereqs(offerings)
-        )
