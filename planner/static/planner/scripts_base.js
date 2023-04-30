@@ -34,7 +34,7 @@ var drake = dragula({
       // check that item can be dropped in this quarter - return false if it cannot
       let item_id = +el.getAttribute('data-id');
       let target_qtr = +target.parentNode.getAttribute('data-qtr');
-      if (quarters[item_id].indexOf(target_qtr) === -1) {
+      if (offered_qtrs[item_id].indexOf(target_qtr) === -1) {
         return false;
       }
       // find index of target qtr, pull course prereqs
@@ -117,7 +117,7 @@ function dragHighlighter(el, source) {
   // returns index of latest-placed prereq, or -1 (if prqs still unplaced) or 0 (if no prqs)
   let final_prq_idx = getFinalPrqIdx(prereqs[course_id], crs_idx);
   if (final_prq_idx > -1) { 
-  let course_qtrs = quarters[course_id];
+  let course_qtrs = offered_qtrs[course_id];
     for (var i = final_prq_idx + 1; i < terms.length - 1; ++i){ // iterator avoids first/last items in the array, which are add-term buttons
       let this_qtr = terms[i].getAttribute('data-qtr');
       if (course_qtrs.includes(+this_qtr)) {

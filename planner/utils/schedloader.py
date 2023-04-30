@@ -18,7 +18,7 @@ def demo():
 
     """
     year = datetime.now().year
-    prereqs, quarters, indices = data_context_builder()
+    prereqs, offered_qtrs, indices = data_context_builder()
 
     context = {
         "sched_id": -1,
@@ -32,7 +32,7 @@ def demo():
             (year,3): []
         },
         "prereqs": prereqs,
-        "quarters": quarters,
+        "offered_qtrs": offered_qtrs,
         "indices": indices,
     }
 
@@ -86,7 +86,7 @@ def existing(schedule, user, sched_list):
 
     # Obtain dicts of course prereqs/quarters offered, initialize
     # dict of course indices (for tracking where courses are placed)
-    prereqs, quarters, indices = data_context_builder()
+    prereqs, offered_qtrs, indices = data_context_builder()
 
     # Iterate over quarters of schedule from start to finish,
     # appending courses which have been scheduled in each. 
@@ -117,7 +117,7 @@ def existing(schedule, user, sched_list):
         "unsched_elec": unsched_courses.filter(required=False),
         "sched_qtrs": sched_qtrs,
         "prereqs": prereqs,
-        "quarters": quarters,
+        "offered_qtrs": offered_qtrs,
         "indices": indices,
         "form": TitleForm(initial={'sched_id': schedule.id, 'title': schedule.name})
     }
@@ -134,17 +134,17 @@ def data_context_builder():
 
     Returns:
         prereqs:  dict mapping course numbers to lists of prereq course numbers
-        quarters: dict mapping course numbers to lists of quarters offered
+        offered_qtrs: dict mapping course numbers to lists of quarters offered
         indices:  dict mapping course numbers to where they are placed in schedule 
                   (initialized to -1, indicating unscheduled)
 
     """
     prereqs = {}
-    quarters = {}
+    offered_qtrs = {}
     indices = {}
     for course in Course.objects.all():
         prereqs[course.course_number] = [prereq.prereq.course_number for prereq in Prereq.objects.filter(course=course)]
-        quarters[course.course_number] = course.qtrs
+        offered_qtrs[course.course_number] = course.qtrs
         indices[course.course_number] = -1 
 
-    return prereqs, quarters, indices
+    return prereqs, offered_qtrs, indices
