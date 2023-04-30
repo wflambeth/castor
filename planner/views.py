@@ -49,7 +49,8 @@ def create(request: HttpRequest) -> JsonResponse:
     be accidental and redirected to "/".
 
     Args:
-        request: XHR POST request from index page JS
+        request: XHR POST request from index page JS.
+                 (No content is needed in POST body.)
     
     Returns:
         JSON response with new schedule ID or error message
@@ -76,7 +77,7 @@ def create(request: HttpRequest) -> JsonResponse:
     return JsonResponse({'msg': 'Schedule created', 'schedule': schedule.id},status=200)
 
 @login_required
-def sched_router(request: HttpRequest, sched_id: int = None) -> HttpResponse:
+def sched_router(request: HttpRequest, sched_id: int) -> HttpResponse:
     """Handles requests to a specific schedule ("/schedules/:id").
 
     Routes to appropriate view function based on request method.
@@ -122,13 +123,7 @@ def display(request: HttpRequest, sched_id: int) -> HttpResponse:
 def update_schedule(request: HttpRequest) -> JsonResponse: 
     """ Handles requests to update a schedule's contents.
 
-    Args:
-        request: XHR PATCH request from index page JS, including
-                 JSON list of courses and terms to update
-
-    Returns:
-        JSON response with status and schedule ID
-
+        Updates are passed via JSON in body of PATCH request.
     """
     su = ScheduleUpdater()
 
@@ -151,6 +146,7 @@ def delete(request: HttpRequest, sched_id: int) -> HttpResponse:
 
     Args:
         request: XHR DELETE request from index page JS
+        sched_id: ID of schedule to delete
     
     Returns:
         JSON response with status of deletion
@@ -174,14 +170,7 @@ def delete(request: HttpRequest, sched_id: int) -> HttpResponse:
 def update_title(request: HttpRequest) -> HttpResponse:
     """Updates the title of a given schedule.
 
-    Args:
-        request: XHR POST request from index page JS, including
-                 Django form object
-    
-    Returns:
-        Redirect to index page with updated schedule ID, 
-        or HTTP error code if invalid form/DB error
-
+       Title is passed via Django form in POST body.
     """
     form = TitleForm(request.POST)
 

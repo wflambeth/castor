@@ -8,13 +8,12 @@ from bs4 import BeautifulSoup, Comment
 from django.core.management.base import BaseCommand
 from planner.models import Course, Prereq
 
-# URL and start snippet for locating course JSON
 
 @define
 class CourseInfo:
-    """Dataclass for converting/validatingstoring scraped course data.
+    """Dataclass for converting/validating/storing scraped course data.
 
-    Uses the attrs package to extend builtin dataclass functionality.
+    Uses the attrs package to extend built-in dataclass functionality.
 
     Public methods (class methods):
         CourseInfo.from_scraped() - Builds CourseInfo instance from scraped course data
