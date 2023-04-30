@@ -5,11 +5,14 @@ const COURSE_COLOR_NORM = '#FFFAF3';
 const TERM_COLOR_DRAG = 'lightgreen';
 const TERM_COLOR_NORM = '';
 
+// Settings object for dragula.js library (drag-and-drop)
 var drake = dragula({
   isContainer: function (el) {
+    // defines containers for draggable objects (quarters/course lists)
     return el.classList.contains('course-container');
   },
   moves: function (el) {
+    // defines draggable objects (courses)
     return (!el.classList.contains('placeholder'));
   },
   accepts: function (el, target, source, sibling) {
@@ -93,7 +96,8 @@ function dropLogger(el, target, source, sibling) {
 drake.on('drag', dragHighlighter);
 drake.on('dragend', endHighlights);
 
-// Highlights prereqs and valid drop terms, when a course is dragged
+// Adds fill color to prereqs and border around valid drop terms,
+// when a course is dragged
 function dragHighlighter(el, source) {
   let course_id = el.getAttribute('data-id');
   
@@ -156,7 +160,6 @@ function getFinalPrqIdx(crs_prq, crs_idx){
   return index;
 }
 
-/* Note to self: scripts previously hosted in scripts_auth.js live past this point */
 /* Allows new quarters to be added to schedule. */
 // For iterative title generation
 const qtr_map = {
@@ -172,14 +175,14 @@ function new_quarter(yr, qtr) {
   /*
    Generates new quarter DOM elements as needed. 
   */
-  // parent div, sets appropriate attributes
+  // make parent div, sets appropriate attributes
   let parent = document.createElement('div');
   parent.setAttribute('class', 'qtr grid');
   parent.setAttribute('id', '_' + yr + '_' + qtr);
   parent.setAttribute('data-yr', yr);
   parent.setAttribute('data-qtr', qtr);
 
-  // title div, including quarter-delete link 
+  // make title div, including quarter-delete link 
   let title = document.createElement('div');
   title.setAttribute('class', 'term-title');
   let title_span = document.createElement('span');
@@ -193,7 +196,7 @@ function new_quarter(yr, qtr) {
   delete_link.innerText = "[x]";
   delete_link.addEventListener('click', update_qtrs);
   
-  // actual course container/droppable area
+  // make actual course container/droppable area for this qtr
   let container = document.createElement('div');
   container.setAttribute('class', 'course-container');
   //TODO: Can I remove these two from child div now that they're in parent? 
@@ -211,7 +214,7 @@ function new_quarter(yr, qtr) {
   return parent;
 }
 
-// Add new quarter to top/beginning of schedule
+// Adds new quarter to top/beginning of schedule
 document.getElementById('add_qtr_before').addEventListener("click", (event) => {
   // get current top node
   let topnode = qtr_nodes[1];
@@ -250,7 +253,7 @@ document.getElementById('add_qtr_before').addEventListener("click", (event) => {
   }
 });
 
-// Add new quarter to bottom/end of schedule
+// Adds new quarter to bottom/end of schedule
 document.getElementById('add_qtr_after').addEventListener("click", (event) => {
   // get current bottom node
   let bottomnode = qtr_nodes[(qtr_nodes.length - 2)];
@@ -283,8 +286,7 @@ document.getElementById('add_qtr_after').addEventListener("click", (event) => {
   console.log(changes);
 });
 
-// hide delete buttons for non-empty and non-edge terms 
-// TODO: why am I using window.onload here, better way to structure this? 
+// hide delete buttons ([x]es) for non-empty and non-edge terms 
 window.onload = (event) => {    
   // add event listeners 
   for (var i = 1; i < qtr_nodes.length - 1; ++i) {
@@ -379,7 +381,7 @@ function update_qtrs (event) {
   }
 }
 
-// Factory for placeholder objects
+// Creates new placeholder objects
 function new_placeholder() {
   let placeholder = document.createElement('div');
   placeholder.setAttribute('class', 'course-item placeholder');
@@ -391,7 +393,8 @@ function new_placeholder() {
   return placeholder
 }
 
-/* Set initial indices of crs_idx on page load (for drag validation logic) */
+/* Set initial indices of courses in crs_idx object
+   on page load (for drag validation logic)      */
 const starting_nodes = Array.from(qtr_nodes);
 for (var i = 1; i < starting_nodes.length - 1; ++i) {
   let nodes = starting_nodes[i].children[1].children;
