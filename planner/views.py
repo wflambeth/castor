@@ -9,7 +9,7 @@ from django.views.decorators.http import require_http_methods, require_safe
 from planner.models import Schedule
 from planner.forms import TitleForm
 
-MAX_SCHEDULES = 10
+MAX_USER_SCHEDULES = 10
 
 @require_safe
 def index(request):
@@ -53,7 +53,7 @@ def create(request):
 
     # Check if user already has max number of schedules
     sched_list = Schedule.objects.filter(user=request.user)
-    if len(sched_list) >= MAX_SCHEDULES:
+    if len(sched_list) >= MAX_USER_SCHEDULES:
         return JsonResponse({'msg': 'Maximum schedules reached'},status=403)
     
     # Create new schedule, save to DB, and return ID
