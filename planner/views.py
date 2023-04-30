@@ -1,7 +1,7 @@
 import json
 from planner.utils.ScheduleUtils import ScheduleLoader, ScheduleUpdater
 from django.shortcuts import HttpResponse, render, redirect
-from django.http import JsonResponse, HttpResponseBadRequest,\
+from django.http import HttpRequest, JsonResponse, HttpResponseBadRequest,\
                         HttpResponseServerError, HttpResponseNotAllowed
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_safe
@@ -11,7 +11,7 @@ from planner.forms import TitleForm
 MAX_USER_SCHEDULES = 10
 
 @require_safe
-def index(request):
+def index(request: HttpRequest) -> HttpResponse:
     """Handles requests to the index page ("/").
     
     If user is logged in, displays their most recently created schedule. 
@@ -42,7 +42,7 @@ def index(request):
 
 @login_required
 @require_http_methods(["GET","POST"])
-def create(request):
+def create(request: HttpRequest) -> JsonResponse:
     """Handles requests to create a new schedule ("/schedules").
 
     Intended to handle POST requests; GET requests assumed to 
@@ -76,7 +76,7 @@ def create(request):
     return JsonResponse({'msg': 'Schedule created', 'schedule': schedule.id},status=200)
 
 @login_required
-def sched_router(request, sched_id):
+def sched_router(request: HttpRequest, sched_id: int = None) -> HttpResponse:
     """Handles requests to a specific schedule ("/schedules/:id").
 
     Routes to appropriate view function based on request method.
@@ -100,7 +100,7 @@ def sched_router(request, sched_id):
         return HttpResponseNotAllowed(['GET', 'POST', 'DELETE', 'PATCH'])
 
 
-def display(request, sched_id):
+def display(request: HttpRequest, sched_id: int) -> HttpResponse:
     """Displays schedule viewer/editor page for a given schedule,
        upon GET request.
     """
@@ -119,7 +119,7 @@ def display(request, sched_id):
     context = sl.existing(schedule, request.user, sched_list)
     return render(request, 'planner/index.html', context)
 
-def update_schedule(request): 
+def update_schedule(request: HttpRequest) -> JsonResponse: 
     """ Handles requests to update a schedule's contents.
 
     Args:
@@ -146,7 +146,7 @@ def update_schedule(request):
 
     return JsonResponse({'status': 'saved', 'schedule': schedule.id}, status=200)
 
-def delete(request, sched_id):
+def delete(request: HttpRequest, sched_id: int) -> HttpResponse:
     """Deletes a given schedule from the database.
 
     Args:
@@ -171,7 +171,7 @@ def delete(request, sched_id):
     # Confirm successful deletion
     return HttpResponse(status=204)
 
-def update_title(request):
+def update_title(request: HttpRequest) -> HttpResponse:
     """Updates the title of a given schedule.
 
     Args:
