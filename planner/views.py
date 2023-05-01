@@ -1,4 +1,5 @@
 import json
+import logging
 from planner.utils.ScheduleUtils import ScheduleLoader, ScheduleUpdater
 from django.shortcuts import HttpResponse, render, redirect
 from django.http import HttpRequest, JsonResponse, HttpResponseBadRequest,\
@@ -9,7 +10,7 @@ from planner.models import Schedule
 from planner.forms import TitleForm
 
 MAX_USER_SCHEDULES = 10
-
+logger = logging.getLogger(__name__)
 
 @require_safe
 def index(request: HttpRequest) -> HttpResponse:
@@ -35,7 +36,7 @@ def index(request: HttpRequest) -> HttpResponse:
             schedule = sl.new(request.user)
             schedule.save()
         except Exception as e:
-            print(e)  # TODO: turn this into a logging statement
+            logger.error(e)
             return HttpResponseServerError('Error creating new schedule')
 
     # Display the schedule in question
@@ -73,7 +74,7 @@ def create(request: HttpRequest) -> JsonResponse:
         schedule = sl.new(request.user)
         schedule.save()
     except Exception as e:
-        print(e)  # TODO: turn this into a logging statement
+        logger.error(e)  # TODO: turn this into a logging statement
         return JsonResponse({'msg': 'Error creating schedule'}, status=500)
 
     return JsonResponse({'msg': 'Schedule created', 'schedule': schedule.id}, status=200)
@@ -141,7 +142,7 @@ def update_schedule(request: HttpRequest) -> JsonResponse:
     try:
         su.update(schedule, data['courses'], data['dates'])
     except Exception as e:
-        print("Error saving schedule updates", e)
+        logger.error(e)
         return JsonResponse({'status': 'failed', 'schedule': schedule.id}, status=500)
 
     return JsonResponse({'status': 'saved', 'schedule': schedule.id}, status=200)
@@ -199,7 +200,7 @@ def update_title(request: HttpRequest) -> HttpResponse:
     try:
         schedule.save()
     except Exception as e:
-        print(e)  # TODO: turn this into a logging statement
+        logger.error(e)  # TODO: turn this into a logging statement
         return HttpResponseServerError('Error saving schedule')
 
     return redirect(f'/?id={schedule.id}')
