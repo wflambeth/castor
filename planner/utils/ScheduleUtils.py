@@ -14,7 +14,8 @@ class ScheduleLoader:
         existing: loads an existing schedule from DB, along with rendering context
     """
 
-    def demo(self) -> dict:
+    @classmethod
+    def demo(cls) -> dict:
         """ Creates and returns rendering context for demo scheduler page.
 
         Called by planner/views.py/index().
@@ -29,7 +30,7 @@ class ScheduleLoader:
 
         """
         year = datetime.now().year
-        prereqs, offered_qtrs, indices = self._data_context_builder()
+        prereqs, offered_qtrs, indices = cls._data_context_builder()
 
         context = {
             "sched_id": -1,
@@ -49,7 +50,8 @@ class ScheduleLoader:
 
         return context
 
-    def new(self, user: User) -> Schedule:
+    @staticmethod
+    def new(user: User) -> Schedule:
         """Builds new schedule object owned by the provided User.
 
         Called by planner/views.py/create(). Does not save schedule to DB;
@@ -74,8 +76,8 @@ class ScheduleLoader:
 
         return schedule
 
-
-    def existing(self, schedule: Schedule, user: User, sched_list: any) -> dict:
+    @classmethod
+    def existing(cls, schedule: Schedule, user: User, sched_list: any) -> dict:
         """Loads an existing schedule from DB, along with rendering context.
 
         Called by planner/views.py/display().
@@ -97,7 +99,7 @@ class ScheduleLoader:
 
         # Obtain dicts of course prereqs/quarters offered, initialize
         # dict of course indices (for tracking where courses are placed)
-        prereqs, offered_qtrs, indices = self._data_context_builder()
+        prereqs, offered_qtrs, indices = cls._data_context_builder()
 
         # Iterate over quarters of schedule from start to finish,
         # appending courses which have been scheduled in each. 
@@ -136,11 +138,11 @@ class ScheduleLoader:
 
         return context
 
-
-    def _data_context_builder(self) -> tuple[dict, dict, dict]:
+    @staticmethod
+    def _data_context_builder() -> tuple[dict, dict, dict]:
         """ Used by new() and existing() to build context for rendering page.
         
-        Stores information on course prereqs and quarters offered, for use 
+        Pulls live DB snapshot of course prereqs and quarters offered, for use 
         by client-side JS. Also initializes an "indices" dict for tracking
         where courses are placed in the schedule.
 
@@ -171,7 +173,8 @@ class ScheduleUpdater:
         update: updates a schedule's contents in the database
     """
 
-    def update(self, schedule: Schedule, courses: list[int], dates: dict[dict]) -> None:
+    @staticmethod
+    def update(schedule: Schedule, courses: list[int], dates: dict[dict]) -> None:
         """ Updates a schedule's contents in the database.
 
         Called by planner/views.py/update_schedule(). Parses JSON data from

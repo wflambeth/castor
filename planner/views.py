@@ -58,7 +58,6 @@ def create(request: HttpRequest) -> JsonResponse:
     Returns:
         JSON response with new schedule ID or error message
     """
-    sl = ScheduleLoader()
 
     # if GET request, redirect to index view
     if request.method == 'GET':
@@ -69,12 +68,12 @@ def create(request: HttpRequest) -> JsonResponse:
     if len(sched_list) >= MAX_USER_SCHEDULES:
         return JsonResponse({'msg': 'Maximum schedules reached'}, status=403)
 
-    # Create new schedule, save to DB, and return ID
+    # Create new schedule, save to DB, and return error/success message
     try:
-        schedule = sl.new(request.user)
+        schedule = ScheduleLoader.new(request.user)
         schedule.save()
     except Exception as e:
-        logger.error(e)  # TODO: turn this into a logging statement
+        logger.error(e)
         return JsonResponse({'msg': 'Error creating schedule'}, status=500)
 
     return JsonResponse({'msg': 'Schedule created', 'schedule': schedule.id}, status=200)
@@ -109,8 +108,6 @@ def display(request: HttpRequest, sched_id: int) -> HttpResponse:
     """Displays schedule viewer/editor page for a given schedule,
        upon GET request.
     """
-    sl = ScheduleLoader()
-
     # Obtain all schedules for this user (to pass to template)
     sched_list = Schedule.objects.filter(user=request.user)
 
@@ -121,7 +118,7 @@ def display(request: HttpRequest, sched_id: int) -> HttpResponse:
         return HttpResponseBadRequest('Schedule not found')
 
     # Load context and render template
-    context = sl.existing(schedule, request.user, sched_list)
+    context = ScheduleLoader.existing(schedule, request.user, sched_list)
     return render(request, 'planner/index.html', context)
 
 
@@ -130,8 +127,6 @@ def update_schedule(request: HttpRequest) -> JsonResponse:
 
         Updates are passed via JSON in body of PATCH request.
     """
-    su = ScheduleUpdater()
-
     data = json.loads(request.body)
     try:
         schedule = Schedule.objects.filter(
@@ -140,7 +135,7 @@ def update_schedule(request: HttpRequest) -> JsonResponse:
         return HttpResponseBadRequest('Schedule not found')
 
     try:
-        su.update(schedule, data['courses'], data['dates'])
+        ScheduleUpdater.update(schedule, data['courses'], data['dates'])
     except Exception as e:
         logger.error(e)
         return JsonResponse({'status': 'failed', 'schedule': schedule.id}, status=500)
@@ -180,27 +175,30 @@ def update_title(request: HttpRequest) -> HttpResponse:
 
        Title is passed via Django form in POST body.
     """
+    # Extract Django form 
     form = TitleForm(request.POST)
-
     if not form.is_valid():
         return HttpResponseBadRequest('Invalid form!')
 
+    # Extract schedule ID and new title from form
     sched_id = form.cleaned_data['sched_id']
     title = form.cleaned_data['title']
 
-    if title is None:
+    # Ensure schedule exists and new title is non-empty
+    if title is None or title == '':
         return HttpResponseBadRequest('Title not found')
-
     try:
         schedule = Schedule.objects.filter(user=request.user).get(id=sched_id)
     except Schedule.DoesNotExist:
         return HttpResponseBadRequest('Schedule not found')
 
+    # Update schedule title and save to DB
     schedule.name = title
     try:
         schedule.save()
     except Exception as e:
-        logger.error(e)  # TODO: turn this into a logging statement
+        logger.error(e)
         return HttpResponseServerError('Error saving schedule')
 
+    # Reload page with updated title 
     return redirect(f'/?id={schedule.id}')
