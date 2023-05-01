@@ -2,7 +2,7 @@ import json
 from planner.utils.ScheduleUtils import ScheduleLoader, ScheduleUpdater
 from django.shortcuts import HttpResponse, render, redirect
 from django.http import HttpRequest, JsonResponse, HttpResponseBadRequest,\
-                        HttpResponseServerError, HttpResponseNotAllowed
+    HttpResponseServerError, HttpResponseNotAllowed
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods, require_safe
 from planner.models import Schedule
@@ -10,10 +10,11 @@ from planner.forms import TitleForm
 
 MAX_USER_SCHEDULES = 10
 
+
 @require_safe
 def index(request: HttpRequest) -> HttpResponse:
     """Handles requests to the index page ("/").
-    
+
     If user is logged in, displays their most recently created schedule. 
     If user is logged out, displays a demo schedule.
     """
@@ -34,14 +35,15 @@ def index(request: HttpRequest) -> HttpResponse:
             schedule = sl.new(request.user)
             schedule.save()
         except Exception as e:
-            print(e) # TODO: turn this into a logging statement
-            return HttpResponseServerError('Error creating new schedule')    
+            print(e)  # TODO: turn this into a logging statement
+            return HttpResponseServerError('Error creating new schedule')
 
     # Display the schedule in question
     return redirect(f'schedules/{schedule.id}')
 
+
 @login_required
-@require_http_methods(["GET","POST"])
+@require_http_methods(["GET", "POST"])
 def create(request: HttpRequest) -> JsonResponse:
     """Handles requests to create a new schedule ("/schedules").
 
@@ -51,7 +53,7 @@ def create(request: HttpRequest) -> JsonResponse:
     Args:
         request: XHR POST request from index page JS.
                  (No content is needed in POST body.)
-    
+
     Returns:
         JSON response with new schedule ID or error message
     """
@@ -64,17 +66,18 @@ def create(request: HttpRequest) -> JsonResponse:
     # Check if user already has max number of schedules
     sched_list = Schedule.objects.filter(user=request.user)
     if len(sched_list) >= MAX_USER_SCHEDULES:
-        return JsonResponse({'msg': 'Maximum schedules reached'},status=403)
-    
+        return JsonResponse({'msg': 'Maximum schedules reached'}, status=403)
+
     # Create new schedule, save to DB, and return ID
     try:
         schedule = sl.new(request.user)
         schedule.save()
     except Exception as e:
-        print(e) # TODO: turn this into a logging statement
+        print(e)  # TODO: turn this into a logging statement
         return JsonResponse({'msg': 'Error creating schedule'}, status=500)
 
-    return JsonResponse({'msg': 'Schedule created', 'schedule': schedule.id},status=200)
+    return JsonResponse({'msg': 'Schedule created', 'schedule': schedule.id}, status=200)
+
 
 @login_required
 def sched_router(request: HttpRequest, sched_id: int) -> HttpResponse:
@@ -84,7 +87,7 @@ def sched_router(request: HttpRequest, sched_id: int) -> HttpResponse:
     """
     if sched_id is None:
         return redirect('/')
-    
+
     if request.method == 'GET':
         # Show schedule
         return display(request, sched_id)
@@ -120,7 +123,8 @@ def display(request: HttpRequest, sched_id: int) -> HttpResponse:
     context = sl.existing(schedule, request.user, sched_list)
     return render(request, 'planner/index.html', context)
 
-def update_schedule(request: HttpRequest) -> JsonResponse: 
+
+def update_schedule(request: HttpRequest) -> JsonResponse:
     """ Handles requests to update a schedule's contents.
 
         Updates are passed via JSON in body of PATCH request.
@@ -129,10 +133,11 @@ def update_schedule(request: HttpRequest) -> JsonResponse:
 
     data = json.loads(request.body)
     try:
-        schedule = Schedule.objects.filter(user=request.user).get(id=int(data['s']))
+        schedule = Schedule.objects.filter(
+            user=request.user).get(id=int(data['s']))
     except Schedule.DoesNotExist:
         return HttpResponseBadRequest('Schedule not found')
-    
+
     try:
         su.update(schedule, data['courses'], data['dates'])
     except Exception as e:
@@ -141,31 +146,33 @@ def update_schedule(request: HttpRequest) -> JsonResponse:
 
     return JsonResponse({'status': 'saved', 'schedule': schedule.id}, status=200)
 
+
 def delete(request: HttpRequest, sched_id: int) -> HttpResponse:
     """Deletes a given schedule from the database.
 
     Args:
         request: XHR DELETE request from index page JS
         sched_id: ID of schedule to delete
-    
+
     Returns:
         JSON response with status of deletion
 
     """
     # Grab schedule object from DB
-    try: 
+    try:
         schedule = Schedule.objects.filter(user=request.user).get(id=sched_id)
     except Schedule.DoesNotExist:
         return HttpResponseBadRequest('Schedule not found')
-    
+
     # Delete schedule from DB
-    try: 
+    try:
         schedule.delete()
     except Exception as e:
         return HttpResponseServerError('Error deleting schedule' + str(e))
-    
+
     # Confirm successful deletion
     return HttpResponse(status=204)
+
 
 def update_title(request: HttpRequest) -> HttpResponse:
     """Updates the title of a given schedule.
@@ -182,7 +189,7 @@ def update_title(request: HttpRequest) -> HttpResponse:
 
     if title is None:
         return HttpResponseBadRequest('Title not found')
-    
+
     try:
         schedule = Schedule.objects.filter(user=request.user).get(id=sched_id)
     except Schedule.DoesNotExist:
@@ -192,7 +199,7 @@ def update_title(request: HttpRequest) -> HttpResponse:
     try:
         schedule.save()
     except Exception as e:
-        print(e) # TODO: turn this into a logging statement
+        print(e)  # TODO: turn this into a logging statement
         return HttpResponseServerError('Error saving schedule')
-    
+
     return redirect(f'/?id={schedule.id}')

@@ -3,32 +3,43 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.postgres.fields import ArrayField
 
-# Inherits from Django's default user model; defining custom
-# user model allows for extensibility in the future
+
 class User(AbstractUser):
-    # username - required, 150 chars or fewer
-    # first_name - optional, 150 chars or fewer
-    # last_name - optional, 150 chars or fewer
-    # email - optional
-    # is_staff - boolean, designates admin site access
-    # is_active - boolean, set False to remove account 
-    # last_login - datetime, auto-updated on login
-    # date_joined - datetime, auto-updated on creation
+    """Represents registered users of the app.
+    
+    Inherits from base Django User class, including:
+        username
+        (hashed) password
+        permissions
+        email address (opt.)
+        first/last names (opt.)
+        date joined
+        last login
+        
+    Declaring here allows extension of the User model in the future.
+    """
     pass
 
-# Represents an individual course in the catalog. Courses:
-# - Have a unique course number (used as primary key)
-# - May be worth 1-16 credits
-# - May be offered in any combination of quarters
-# - May be required or elective
 class Course(models.Model):
+    """Represents an individual course in the catalog.
+    """
+    # Course number is the primary key, e.g. 142
+    # This is an issue with CS 406, which is repeatable and variable-credit. 
+    # Will require either a DB redesign or workarounds in frontend rendering. 
     course_number = models.PositiveSmallIntegerField(primary_key=True)
+    
+    # Official course title 
     title = models.CharField(max_length=100, unique=True)
+    
+    # Number of credits (nearly all courses are 4, but 1-16 are possible)
     credits = models.PositiveSmallIntegerField(
         default=4,
         validators=[MaxValueValidator(16), MinValueValidator(1)]
     )
+    # Quarter(s) in which course is offered 
     qtrs = ArrayField(models.PositiveSmallIntegerField(), size=4)
+    
+    # Whether course is required or elective for CS majors
     required = models.BooleanField(default=False)
 
     class Meta:
@@ -37,10 +48,15 @@ class Course(models.Model):
     def __str__(self):
         return "CS " + str(self.course_number) + " - " + str(self.title)
 
-# Represents a schedule created by a user. Schedules:
-# - Are associated with a given User (foreign key)
-# - Have defined start and end quarters, and include all quarters between
 class Schedule(models.Model):
+    """ Represents a schedule created by a user.
+
+        Schedules have customizable names and start/end dates.
+        Users are stored as foreign keys. 
+        Courses link to Schedules via the Course_Schedule intersection table, below.
+    """
+    # IntegerChoices creates an enum-like class, restricting
+    # choices for start_qtr/end_qtr to valid values.
     class Quarter(models.IntegerChoices):
         WINTER = 0
         SPRING = 1
@@ -51,7 +67,7 @@ class Schedule(models.Model):
     name = models.CharField(max_length=100, default="My new schedule")
     start_qtr = models.PositiveSmallIntegerField(choices=Quarter.choices)
     end_qtr = models.PositiveSmallIntegerField(choices=Quarter.choices)
-    start_year = models.PositiveSmallIntegerField() 
+    start_year = models.PositiveSmallIntegerField()
     end_year = models.PositiveSmallIntegerField()
 
     class Meta:
@@ -62,28 +78,41 @@ class Schedule(models.Model):
     def __str__(self):
         return str(self.id) + ' - ' + self.name
 
-# Intersection table capturing M:M relationship between Courses and Schedules.
-# Each Course_Schedule also cpatures the year and quarter the course is slotted into
 class Course_Schedule(models.Model):
+    """ Represents a course's assignment to a given schedule.
+
+        Uniqueness enforced on the combination of two foreign keys, 
+        Schedule and Course. Also stores year/qtr within schedule.    
+    """
     schedule = models.ForeignKey('Schedule', on_delete=models.CASCADE)
     course = models.ForeignKey('Course', on_delete=models.CASCADE)
     year = models.PositiveSmallIntegerField()
     qtr = models.PositiveSmallIntegerField(choices=Schedule.Quarter.choices)
 
     constraints = [
-        models.UniqueConstraint(fields=['schedule', 'course'], 
+        models.UniqueConstraint(fields=['schedule', 'course'],
                                 name='unique_class_instance_per_schedule')
         # TODO: add check constraint for year/qtr within schedule bounds
     ]
 
     def __str__(self):
         return str(self.schedule) + " - " + str(self.course.course_number) + \
-                " (" + str(self.qtr) + " " + str(self.year) + ")"
+            " (" + str(self.qtr) + " " + str(self.year) + ")"
 
-# Table capturing M:M relationship between Courses and their prerequisite Courses
+
 class Prereq(models.Model):
-    course = models.ForeignKey('Course', related_name='course', on_delete=models.CASCADE)
-    prereq = models.ForeignKey('Course', related_name='prereq', on_delete=models.CASCADE)
+    """ Represents a prerequisite relationship between two Courses.
+
+        'course' is the course that has a prerequisite, while
+        'prereq' is the prerequisite. 
+
+    """
+    course = models.ForeignKey(
+        'Course', related_name='course', on_delete=models.CASCADE)
+    prereq = models.ForeignKey(
+        'Course', related_name='prereq', on_delete=models.CASCADE)
+
+        # TODO: Add uniqueness constraint on course/prereq pair
 
     def __str__(self):
         return "CS " + str(self.course.course_number) + \
