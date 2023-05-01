@@ -31,7 +31,7 @@ class CourseInfo:
 
     """
     @staticmethod
-    def _normalize_title(title: str) -> str:
+    def _format_title(title: str) -> str:
         """Intake formatter for course titles. 
 
         Args:
@@ -57,7 +57,7 @@ class CourseInfo:
         return title
 
     @staticmethod
-    def _normalize_credits(credits: str) -> int:
+    def _format_credits(credits: str) -> int:
         """Intake formatter for course credits.
 
         Args:
@@ -74,8 +74,8 @@ class CourseInfo:
             return int(credits[0])
 
     course_number: int = field(converter=int)
-    title: str = field(converter=_normalize_title)
-    credits: int = field(converter=_normalize_credits)
+    title: str = field(converter=_format_title)
+    credits: int = field(converter=_format_credits)
     qtrs: list[int] = field(converter=lambda x: sorted(list(set(x))))
     prereqs: list[int] = field(converter=lambda x: sorted(list(set(x))))
 
@@ -170,14 +170,11 @@ class Command(BaseCommand):
         course_json = self._scrape_json()
         scraped_data = json.loads(course_json)
 
-        # build list of CourseInfo dataclass instances
+        # build list of courses from each source
         scraped_courses = self._build_scraped_courses(scraped_data)
-
-        # Pull stored course and prereq data
         db_courses = list(Course.objects.all().values())
-        db_prereqs = Prereq.objects.all()
 
-        # Iterate over DB courses/scraped courses and compare
+        # Iterate over DB/scraped courses and compare
         i = j = 0
         course_ct = max(len(scraped_courses), len(db_courses))
         issue_ct = 0
@@ -209,21 +206,20 @@ class Command(BaseCommand):
                                             db_courses[j][key], asdict(scraped_courses[i])[key])
                     issue_ct += 1
 
-            # Build prereq lists for this course
-            db_prereqs = self._build_db_prereq_list(
-                db_courses[j]['course_number'])
-            scraped_prereqs = sorted(scraped_courses[i].prereqs)
+            # Build prereq list for this course from DB 
+            db_prereqs = self._build_db_prereq_list(db_courses[j]['course_number'])
+
             # Compare prereqs, logging any differences
-            if db_prereqs != scraped_prereqs:
+            if db_prereqs != scraped_courses[i].prereqs:
                 self._print_discrepancy('prereq', scraped_courses[i].course_number,
-                                        db_prereqs, scraped_prereqs)
+                                        db_prereqs, scraped_courses[i].prereqs)
                 issue_ct += 1
 
             # After comparisons, iterate forward in both course lists
             i += 1
             j += 1
 
-        # Print completion message and # of mismatches found
+        # Log scrape completion and # of issues found
         if issue_ct == 0:
             logger.info("SCRAPING COMPLETED. NO ISSUES FOUND")
         else:
@@ -249,20 +245,20 @@ class Command(BaseCommand):
             scraped_data (list): A list of dicts, each containing course data
 
         Returns:
-            List of CourseInfo dataclass instances, one for each course in scraped_data
+            List of CourseInfo dataclass instances, one per course in scraped_data
         """
         courses = []
 
         # Iterate over raw JSON-loaded data, storing in dataclass
         for course in scraped_data:
             if CourseInfo.is_valid_postbac_course(course['CourseNumber']):
-                # Wrap single-session courses in a list for format consistency
+                # Wrap single-session courses in a list for type consistency
                 if type(course['Offerings']['CourseOffering']) is dict:
                     sessions = [course['Offerings']['CourseOffering']]
                 else:
                     sessions = course['Offerings']['CourseOffering']
 
-                # Conversion/validation handled in dataclass; see below
+                # Conversion/validation handled by dataclass
                 courses.append(CourseInfo.from_scraped(sessions))
 
         return courses
@@ -271,19 +267,14 @@ class Command(BaseCommand):
     def _build_db_prereq_list(course_number: int) -> list[int]:
         """Builds prereq list from DB for a given course. 
 
-        This is needed because prereqs are stored as FK:FK relations in their own
-        table in DB, but are attached to Course objects directly in web scrape. 
-        (In the future, will be better to align on these.)
-
         Args:
-            course_number: The course number of the course whose prereqs are needed
+            course_number: The course number whose prereqs are needed
 
         Returns:
             A sorted list of prereq course numbers for that course, as stored in DB. 
 
         """
-        prereq_vals = Prereq.objects.filter(
-            course=course_number).values_list("prereq")
+        prereq_vals = Prereq.objects.filter(course=course_number).values_list("prereq")
         prereq_list = sorted([prereq[0] for prereq in prereq_vals])
 
         return prereq_list
