@@ -23,9 +23,8 @@ class User(AbstractUser):
 class Course(models.Model):
     """Represents an individual course in the catalog.
     """
-    # Course number is the primary key, e.g. 142
-    # This is an issue with CS 406, which is repeatable and variable-credit. 
-    # Will require either a DB redesign or workarounds in frontend rendering. 
+    # Course number (CS XXX) serves as primary key
+    # May be worth refactoring, due to CS 406 (variable credit, repeatable)
     course_number = models.PositiveSmallIntegerField(primary_key=True)
     
     # Official course title 
