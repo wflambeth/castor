@@ -210,18 +210,24 @@ class ScheduleUpdater:
         for crs_num, term in courses.items():
             course = Course.objects.get(course_number=int(crs_num))
 
-            # Pull existing course-schedule relationship if it exists
-            try:
-                crs_sch = Course_Schedule.objects.get(schedule=schedule, course=course)
-            # Create new relationship if it doesn't
-            except Course_Schedule.DoesNotExist:
-                crs_sch = Course_Schedule(schedule=schedule, course=course)
-
-            # if course is to be removed from schedule, do so
-            if not term['year'] or term['year'] == 'null':
-                crs_sch.delete()
-            # otherwise, update year/qtr as specified
+            # If course is to be deleted
+            if not term['year'] or term['year'] == 'null':            
+                # Pull existing course-schedule relationship and delete
+                try:
+                    crs_sch = Course_Schedule.objects.get(schedule=schedule, course=course)
+                    crs_sch.delete()
+                # If not yet saved, no problem; move on
+                except Course_Schedule.DoesNotExist:
+                    continue
+            
+            # Otherwise, course is to be added/moved
             else:
+                try:
+                    crs_sch = Course_Schedule.objects.get(schedule=schedule, course=course)
+                except Course_Schedule.DoesNotExist:
+                    crs_sch = Course_Schedule(schedule=schedule, course=course)
+                
+                # Update year/qtr as specified
                 crs_sch.year = term['year']
                 crs_sch.qtr = term['qtr']
                 crs_sch.save()
