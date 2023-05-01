@@ -19,11 +19,10 @@ def index(request: HttpRequest) -> HttpResponse:
     If user is logged in, displays their most recently created schedule. 
     If user is logged out, displays a demo schedule.
     """
-    sl = ScheduleLoader()
 
     # If user is logged out, show 'demo' schedule
     if not request.user.is_authenticated:
-        return render(request, 'planner/index.html', sl.demo())
+        return render(request, 'planner/index.html', ScheduleLoader.demo())
 
     # Check for existing schedules for this user
     sched_list = Schedule.objects.filter(user=request.user)
@@ -33,7 +32,7 @@ def index(request: HttpRequest) -> HttpResponse:
     # ...or if they have no schedules, create new one
     else:
         try:
-            schedule = sl.new(request.user)
+            schedule = ScheduleLoader.new(request.user)
             schedule.save()
         except Exception as e:
             logger.error(e)
@@ -127,20 +126,23 @@ def update_schedule(request: HttpRequest) -> JsonResponse:
 
         Updates are passed via JSON in body of PATCH request.
     """
+    # Load update data and confirm schedule exists
     data = json.loads(request.body)
     try:
         schedule = Schedule.objects.filter(
             user=request.user).get(id=int(data['s']))
     except Schedule.DoesNotExist:
-        return HttpResponseBadRequest('Schedule not found')
+        return JsonResponse({'msg': 'not found', 'schedule': schedule.id}, status=404)
 
+    # Apply/save requested updates
     try:
         ScheduleUpdater.update(schedule, data['courses'], data['dates'])
     except Exception as e:
         logger.error(e)
-        return JsonResponse({'status': 'failed', 'schedule': schedule.id}, status=500)
+        return JsonResponse({'msg': 'failed', 'schedule': schedule.id}, status=500)
 
-    return JsonResponse({'status': 'saved', 'schedule': schedule.id}, status=200)
+    # Confirm success
+    return JsonResponse({'msg': 'saved', 'schedule': schedule.id}, status=200)
 
 
 def delete(request: HttpRequest, sched_id: int) -> HttpResponse:
