@@ -170,54 +170,13 @@ class Command(BaseCommand):
         course_json = self._scrape_json()
         scraped_data = json.loads(course_json)
 
-        # build list of courses from each source
+        # Build list of courses from each source
         scraped_courses = self._build_scraped_courses(scraped_data)
         db_courses = list(Course.objects.all().values())
 
-        # Iterate over DB/scraped courses and compare
-        i = j = 0
-        course_ct = max(len(scraped_courses), len(db_courses))
-        issue_ct = 0
-
-        while i < course_ct and j < course_ct:
-            # Ensure that course numbers are same
-            if scraped_courses[i].course_number != db_courses[j]['course_number']:
-                # If scraped course is not yet in DB, log and iterate past
-                if scraped_courses[i].course_number < db_courses[j]['course_number']:
-                    logger.warning("NEW COURSE: " +
-                                   str(scraped_courses[i].course_number) +
-                                   ' ' + scraped_courses[i].title + '\n\n')
-                    i += 1
-                    issue_ct += 1
-                    continue
-                # If DB course is missing from scrape, log and iterate past
-                else:
-                    logger.warning("STALE COURSE: " +
-                                   str(db_courses[j]['course_number']) +
-                                   ' ' + db_courses[j]['title'] + '\n\n')
-                    j += 1
-                    issue_ct += 1
-                    continue
-
-            # Compare quarters/credits/titles, logging any differences
-            for key in ['title', 'credits', 'qtrs']:
-                if asdict(scraped_courses[i])[key] != db_courses[j][key]:
-                    self._print_discrepancy(key, scraped_courses[i].course_number,
-                                            db_courses[j][key], asdict(scraped_courses[i])[key])
-                    issue_ct += 1
-
-            # Build prereq list for this course from DB 
-            db_prereqs = self._build_db_prereq_list(db_courses[j]['course_number'])
-
-            # Compare prereqs, logging any differences
-            if db_prereqs != scraped_courses[i].prereqs:
-                self._print_discrepancy('prereq', scraped_courses[i].course_number,
-                                        db_prereqs, scraped_courses[i].prereqs)
-                issue_ct += 1
-
-            # After comparisons, iterate forward in both course lists
-            i += 1
-            j += 1
+        # Compare contents and check for any issues 
+        # (Individual issues are also printed to logs in _compare_course_lists)
+        issue_ct = self._compare_course_lists(scraped_courses, db_courses)
 
         # Log scrape completion and # of issues found
         if issue_ct == 0:
@@ -278,6 +237,68 @@ class Command(BaseCommand):
         prereq_list = sorted([prereq[0] for prereq in prereq_vals])
 
         return prereq_list
+
+    def _compare_course_lists(self, scraped_courses: list, db_courses: list) -> int:
+        """Iterates over contents of scrape and course database, flagging errors.
+
+        Args:
+            scraped_courses: List of CourseInfo objects 
+            db_courses: List of dicts holding data from DB Course objects
+        
+        Returns:
+            int representing the number of discrepancies found
+        
+        """
+        
+        # Initialize parameters for comparison loop
+        i = j = 0
+        course_ct = max(len(scraped_courses), len(db_courses))
+        issue_ct = 0
+
+        # Loop over scrape/db contents and compare
+        while i < course_ct and j < course_ct:
+            # First ensure that course numbers are same
+            if scraped_courses[i].course_number != db_courses[j]['course_number']:
+                # If scraped course is not yet in DB, log and iterate past
+                if scraped_courses[i].course_number < db_courses[j]['course_number']:
+                    logger.warning("NEW COURSE: " +
+                                   str(scraped_courses[i].course_number) +
+                                   ' ' + scraped_courses[i].title + '\n\n')
+                    i += 1
+                    issue_ct += 1
+                    continue
+                # If DB course is missing from scrape, log and iterate past
+                else:
+                    logger.warning("STALE COURSE: " +
+                                   str(db_courses[j]['course_number']) +
+                                   ' ' + db_courses[j]['title'] + '\n\n')
+                    j += 1
+                    issue_ct += 1
+                    continue
+
+            # Compare quarters/credits/titles, logging any differences
+            for key in ['title', 'credits', 'qtrs']:
+                if asdict(scraped_courses[i])[key] != db_courses[j][key]:
+                    self._print_discrepancy(key, scraped_courses[i].course_number,
+                                            db_courses[j][key], asdict(scraped_courses[i])[key])
+                    issue_ct += 1
+
+            # Build prereq list for this course from DB 
+            db_prereqs = self._build_db_prereq_list(db_courses[j]['course_number'])
+
+            # Compare prereqs, logging any differences
+            if db_prereqs != scraped_courses[i].prereqs:
+                self._print_discrepancy('prereq', scraped_courses[i].course_number,
+                                        db_prereqs, scraped_courses[i].prereqs)
+                issue_ct += 1
+
+            # After comparisons, iterate forward in both course lists
+            i += 1
+            j += 1
+        
+        # Return number of issues found
+        return issue_ct
+
 
     @staticmethod
     def _print_discrepancy(key: str, course: int, db_val: int | str | list,
