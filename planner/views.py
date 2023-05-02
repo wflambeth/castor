@@ -1,6 +1,6 @@
 import json
 import logging
-from planner.utils.ScheduleUtils import ScheduleLoader, ScheduleUpdater
+from planner.utils import ScheduleUtils
 from django.shortcuts import HttpResponse, render, redirect
 from django.http import HttpRequest, JsonResponse, HttpResponseBadRequest,\
     HttpResponseServerError, HttpResponseNotAllowed
@@ -23,7 +23,7 @@ def index(request: HttpRequest) -> HttpResponse:
 
     # If user is logged out, show 'demo' schedule
     if not request.user.is_authenticated:
-        return render(request, 'planner/index.html', ScheduleLoader.demo())
+        return render(request, 'planner/index.html', ScheduleUtils.get_context_demo())
 
     # Check for existing schedules for this user
     sched_list = Schedule.objects.filter(user=request.user)
@@ -33,7 +33,7 @@ def index(request: HttpRequest) -> HttpResponse:
     # ...or if they have no schedules, create new one
     else:
         try:
-            schedule = ScheduleLoader.new(request.user)
+            schedule = ScheduleUtils.new_schedule(request.user)
             schedule.save()
         except Exception as e:
             logger.error(e)
@@ -70,7 +70,7 @@ def create(request: HttpRequest) -> JsonResponse:
 
     # Create new schedule, save to DB, and return error/success message
     try:
-        schedule = ScheduleLoader.new(request.user)
+        schedule = ScheduleUtils.new_schedule(request.user)
         schedule.save()
     except Exception as e:
         logger.error(e)
@@ -118,7 +118,7 @@ def display(request: HttpRequest, sched_id: int) -> HttpResponse:
         return HttpResponseBadRequest('Schedule not found')
 
     # Load context and render template
-    context = ScheduleLoader.existing(schedule, request.user, sched_list)
+    context = ScheduleUtils.get_context_existing(schedule, request.user, sched_list)
     return render(request, 'planner/index.html', context)
 
 
@@ -136,7 +136,7 @@ def update_schedule(request: HttpRequest, sched_id: int) -> JsonResponse:
 
     # Apply/save requested updates
     try:
-        ScheduleUpdater.update(schedule, data['courses'], data['dates'])
+        ScheduleUtils.update_schedule(schedule, data['courses'], data['dates'])
     except Exception as e:
         logger.error(e)
         return JsonResponse({'msg': 'failed', 'schedule': schedule.id}, status=500)
