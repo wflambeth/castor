@@ -21,7 +21,7 @@ var drake = dragula({
     This is true if the course is offered that quarter, and if all prereqs have been 
     scheduled previously. 
     */
-    if (changes['s'] !== 'NULL') { // TODO: Hack to avoid issues with logged-out demo page; remove
+    if (page_sched_id !== 'NULL') { // TODO: Hack to avoid issues with logged-out demo page; remove
       // course containers always accept their children back to them
       let target_id = target.getAttribute('id');
       let required = el.getAttribute('data-req') === 'true' ? true : false;

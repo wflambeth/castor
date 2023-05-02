@@ -16,7 +16,8 @@ logger = logging.getLogger(__name__)
 def index(request: HttpRequest) -> HttpResponse:
     """Handles requests to the index page ("/").
 
-    If user is logged in, displays their most recently created schedule. 
+    If user is logged in, displays their most recently created 
+    schedule (or creates one if they have none). 
     If user is logged out, displays a demo schedule.
     """
 
@@ -39,7 +40,7 @@ def index(request: HttpRequest) -> HttpResponse:
             return HttpResponseServerError('Error creating new schedule')
 
     # Display the schedule in question
-    return redirect(f'schedules/{schedule.id}')
+    return redirect('sched_router', schedule.id)
 
 
 @login_required
@@ -95,10 +96,10 @@ def sched_router(request: HttpRequest, sched_id: int) -> HttpResponse:
         return delete(request, sched_id)
     elif request.method == 'POST':
         # Update schedule title
-        return update_title(request)
+        return update_title(request, sched_id)
     elif request.method == 'PATCH':
         # Update schedule contents
-        return update_schedule(request)
+        return update_schedule(request, sched_id)
     else:
         return HttpResponseNotAllowed(['GET', 'POST', 'DELETE', 'PATCH'])
 
@@ -121,7 +122,7 @@ def display(request: HttpRequest, sched_id: int) -> HttpResponse:
     return render(request, 'planner/index.html', context)
 
 
-def update_schedule(request: HttpRequest) -> JsonResponse:
+def update_schedule(request: HttpRequest, sched_id: int) -> JsonResponse:
     """ Handles requests to update a schedule's contents.
 
         Updates are passed via JSON in body of PATCH request.
@@ -129,8 +130,7 @@ def update_schedule(request: HttpRequest) -> JsonResponse:
     # Load update data and confirm schedule exists
     data = json.loads(request.body)
     try:
-        schedule = Schedule.objects.filter(
-            user=request.user).get(id=int(data['s']))
+        schedule = Schedule.objects.filter(user=request.user).get(id=sched_id)
     except Schedule.DoesNotExist:
         return JsonResponse({'msg': 'not found', 'schedule': schedule.id}, status=404)
 
@@ -172,7 +172,7 @@ def delete(request: HttpRequest, sched_id: int) -> HttpResponse:
     return HttpResponse(status=204)
 
 
-def update_title(request: HttpRequest) -> HttpResponse:
+def update_title(request: HttpRequest, sched_id: int) -> HttpResponse:
     """Updates the title of a given schedule.
 
        Title is passed via Django form in POST body.
@@ -182,8 +182,7 @@ def update_title(request: HttpRequest) -> HttpResponse:
     if not form.is_valid():
         return HttpResponseBadRequest('Invalid form!')
 
-    # Extract schedule ID and new title from form
-    sched_id = form.cleaned_data['sched_id']
+    # Extract new title 
     title = form.cleaned_data['title']
 
     # Ensure schedule exists and new title is non-empty
@@ -203,4 +202,4 @@ def update_title(request: HttpRequest) -> HttpResponse:
         return HttpResponseServerError('Error saving schedule')
 
     # Reload page with updated title 
-    return redirect(f'/?id={schedule.id}')
+    return redirect('sched_router', schedule.id)
