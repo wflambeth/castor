@@ -12,6 +12,7 @@ from planner.forms import TitleForm
 MAX_USER_SCHEDULES = 10
 logger = logging.getLogger(__name__)
 
+
 @require_safe
 def index(request: HttpRequest) -> HttpResponse:
     """Handles requests to the index page ("/").
@@ -118,7 +119,8 @@ def display(request: HttpRequest, sched_id: int) -> HttpResponse:
         return HttpResponseBadRequest('Schedule not found')
 
     # Load context and render template
-    context = ScheduleUtils.get_context_existing(schedule, request.user, sched_list)
+    context = ScheduleUtils.get_context_existing(
+        schedule, request.user, sched_list)
     return render(request, 'planner/index.html', context)
 
 
@@ -177,12 +179,12 @@ def update_title(request: HttpRequest, sched_id: int) -> HttpResponse:
 
        Title is passed via Django form in POST body.
     """
-    # Extract Django form 
+    # Extract Django form
     form = TitleForm(request.POST)
     if not form.is_valid():
         return HttpResponseBadRequest('Invalid form!')
 
-    # Extract new title 
+    # Extract new title
     title = form.cleaned_data['title']
 
     # Ensure schedule exists and new title is non-empty
@@ -201,5 +203,5 @@ def update_title(request: HttpRequest, sched_id: int) -> HttpResponse:
         logger.error(e)
         return HttpResponseServerError('Error saving schedule')
 
-    # Reload page with updated title 
+    # Reload page with updated title
     return redirect('sched_router', schedule.id)
