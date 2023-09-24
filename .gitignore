@@ -96,3 +96,5 @@ sprintnotes.txt
 planner/static/planner/dragula*
 staticfiles/
 fixtures/
+*.log
+.pytest_cache

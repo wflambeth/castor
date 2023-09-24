@@ -35,7 +35,6 @@
 
 # Distribution / packaging
 **/.Python
-**/env
 **/build
 **/develop-eggs
 **/dist
@@ -93,3 +92,9 @@
 **/mydegrees*
 **/rawclassinfo.txt
 **/.vscode
+
+castor.log
+fly.toml
+README.md
+.gitignore
+.pytest_cache

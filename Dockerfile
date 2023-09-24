@@ -1,13 +1,6 @@
-ARG PYTHON_VERSION=3.10-buster
+FROM python:3.11-slim-bookworm
 
-FROM python:${PYTHON_VERSION}
-
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-
-RUN mkdir -p /code
-
-WORKDIR /code
+WORKDIR /app
 
 COPY requirements.txt /tmp/requirements.txt
 
@@ -16,10 +9,12 @@ RUN set -ex && \
     pip install -r /tmp/requirements.txt && \
     rm -rf /root/.cache/
 
-COPY . /code/
+COPY . /app/
 
-RUN ENV=PROD python manage.py collectstatic --noinput
+ENV DJANGO_SETTINGS_MODULE=castor.settings
 
-EXPOSE 8000
+RUN python manage.py collectstatic --noinput
+
+EXPOSE 8000 5432
 
 CMD ["gunicorn", "--bind", ":8000", "--workers", "2", "castor.wsgi"]

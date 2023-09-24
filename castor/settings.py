@@ -2,7 +2,7 @@ from pathlib import Path
 import os, dj_database_url
 from dotenv import load_dotenv
 
-ENV = os.environ['ENV']
+ENV = os.environ.get('ENV', 'PROD')
 if ENV == 'DEV':
     load_dotenv()
 
@@ -13,13 +13,9 @@ SECRET_KEY = os.environ.get('SECRET_KEY', '123fakekey')
 
 DEBUG = eval(os.environ.get('DEBUG', 'False'))
 
-ALLOWED_HOSTS = [
-    str(os.environ.get('ALLOWED_HOSTS', 'NULL'))
-]
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'NULL').split(',')
 
-CSRF_TRUSTED_ORIGINS = [
-    str(os.environ.get('CSRF_TRUSTED_ORIGINS', 'https://null.xyz'))
-]
+CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'https://null.xyz').split(',')
 
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
@@ -131,6 +127,16 @@ STATIC_URL = "static/"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 STATIC_ROOT = "staticfiles/"
 
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
@@ -174,7 +180,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': os.environ.get('LOGGING_URL', '/code/castor/castor.log'),
+            'filename': os.environ.get('LOGGING_URL', '/app/castor/castor.log'),
             'formatter': 'verbose'
         },
         'console': {
