@@ -93,6 +93,8 @@
 **/rawclassinfo.txt
 **/.vscode
 
+/demo_content
+
 castor.log
 fly.toml
 README.md
