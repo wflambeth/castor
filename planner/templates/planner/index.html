@@ -71,7 +71,7 @@
             <h2>Required Courses</h2>
             <div class="course-container" id="req-container">
                 {% for course in unsched_req %}
-                <div class="course-item course" data-id="{{course.course_number}}" data-qtrs="{{course.qtrs}}" data-req="true">
+                <div class="course-item course" data-id="{{course.course_number}}" data-qtrs="{{course.qtrs}}" data-req="true" data-credits="{{course.credits}}">
                     <span class="course-number">{{ course.course_number }}</span><span class="course-title">{{ course.title }}</span>
                 </div>
                 {% endfor %}
@@ -79,7 +79,7 @@
             <h2>Electives</h2>
             <div class="course-container" id="elec-container">
                 {% for course in unsched_elec%}
-                <div class="course-item course" data-id="{{course.course_number}}" data-qtrs="{{course.qtrs}}" data-req="false">
+                <div class="course-item course" data-id="{{course.course_number}}" data-qtrs="{{course.qtrs}}" data-req="false" data-credits="{{course.credits}}">
                     <span class="course-number">{{ course.course_number }}</span><span class="course-title">{{ course.title }}</span>
                     {% if not course.credits == 4 %}
                     <span class="course-credits">({{ course.credits }})</span>
@@ -98,6 +98,7 @@
         </div>
 
         <div id="schedule">
+            <h2 id="credit-header">Credits: <span id="credit-display">{{ credits }}</span>/60</h2>
             <div id="schedule-wrapper" class="term-container grid-wrapper container">
                 <button class="add_qtr" id="add_qtr_before">+</button>
                     {% for term, courses in sched_qtrs.items %}
@@ -117,7 +118,8 @@
                             {% for course in courses %}
                             <div class="course-item course" data-id="{{course.course.course_number}}"
                             data-req="{% if course.course.required %}true{% else %}false{% endif %}"
-                            data-qtrs="{{course.course.qtrs}}">
+                            data-qtrs="{{course.course.qtrs}}"
+                            data-credits="{{course.course.credits}}">
                             <span class="course-number">{{ course.course.course_number }}</span><span class="course-title">{{ course.course.title }}</span>
                             {% if not course.course.credits == 4 %}
                             <span class="course-credits">({{ course.course.credits }})</span>
@@ -179,6 +181,7 @@
             const prereqs = {{ prereqs }};
             const offered_qtrs = {{ offered_qtrs }};
             const crs_idx = {{ indices }};
+            var credits = {{ credits }};
         </script>
     </footer>
 </body>

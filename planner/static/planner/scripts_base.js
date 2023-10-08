@@ -90,6 +90,19 @@ function dropLogger(el, target, source, sibling) {
     let curr_nodes = Array.from(qtr_nodes);
     let this_index = curr_nodes.indexOf(target.parentNode);
     crs_idx[id] = this_index;
+
+    // Update displayed credit count
+    // First, check that we're either scheduling or unscheduling a course
+    // (these are null for non-schedule targets, looking for 1 scheduled and 1 not)
+    let source_yr = source.getAttribute('data-yr');
+    if ((source_yr === null) ^ (year === null)) {
+      let creds = el.getAttribute('data-credits');
+      // if target is a non-schedule, remove credits rather than add them
+      if (year === null) {
+        creds *= -1;
+      }
+      update_credits(creds);
+    }
   }
 }
 
@@ -380,6 +393,23 @@ function new_placeholder() {
   return placeholder
 }
 
+// Update the displayed/tracked amount of credits in schedule, when a course is dragged in/out
+function update_credits(amount) {
+    // modify our global credits object
+    credits = Number(credits) + Number(amount);
+    // modify the number in the credits displayer
+    let display = document.getElementById('credit-display');
+    display.textContent = credits
+
+    // if we hit the threshold, let's party! 
+    let display_span = document.getElementById('credit-header');
+    if (credits >= 60) {
+      display_span.style.color = "lightgreen";
+    } else {
+      display_span.style.color = "";
+    }
+}
+
 /* Hide the quarter "delete" buttons ([x]es) for non-empty and non-edge terms,
    and add event listeners for initial [x]es */
 for (var i = 1; i < qtr_nodes.length - 1; ++i) {
@@ -402,3 +432,6 @@ for (var i = 1; i < starting_nodes.length - 1; ++i) {
       }
   }
 }
+
+// Update credit styles on first run 
+update_credits(0);

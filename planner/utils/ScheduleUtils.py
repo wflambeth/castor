@@ -65,6 +65,7 @@ def get_context_demo() -> dict:
         "prereqs": prereqs,
         "offered_qtrs": offered_qtrs,
         "indices": indices,
+        "credits": 0
     }
 
     return context
@@ -101,6 +102,7 @@ def get_context_existing(schedule: Schedule, user: User, sched_list: any) -> dic
     # Iterate over quarters of schedule from start to finish,
     # appending courses which have been scheduled in each.
     sched_qtrs = {}
+    credits = 0
     qtr = schedule.start_qtr
     year = schedule.start_year
 
@@ -112,6 +114,7 @@ def get_context_existing(schedule: Schedule, user: User, sched_list: any) -> dic
         # of the scheduled courses. (Probably could stand a refactor, it's a bit much.)
         sched_qtrs[(year, qtr)] = []
         for course in sched_courses.filter(year=year, qtr=qtr):
+            credits += course.course.credits
             sched_qtrs[(year, qtr)].append(course)
 
         qtr = qtr + 1 if qtr < 3 else 0
@@ -130,6 +133,7 @@ def get_context_existing(schedule: Schedule, user: User, sched_list: any) -> dic
         "prereqs": prereqs,
         "offered_qtrs": offered_qtrs,
         "indices": indices,
+        "credits": credits,
         "form": TitleForm(initial={'title': schedule.name})
     }
 
