@@ -286,19 +286,6 @@ document.getElementById('add_qtr_after').addEventListener("click", (event) => {
   console.log(changes);
 });
 
-// hide delete buttons ([x]es) for non-empty and non-edge terms 
-window.onload = (event) => {    
-  // add event listeners 
-  for (var i = 1; i < qtr_nodes.length - 1; ++i) {
-      qtr_nodes[i].children[0].children[1].addEventListener('click', update_qtrs);
-  }
-  // ensure first & last qtrs are deleteable, as long as there is > 1 qtr
-  if (qtr_nodes.length > 3) {
-      qtr_nodes[1].children[0].children[1].hidden = false;
-      qtr_nodes[qtr_nodes.length - 2].children[0].children[1].hidden = false;
-  }
-}
-
 // This function is called when hitting the [x] on a quarter (TODO: needs a better name)
 // Clears qtrs with courses within them, and is also used to delete qtrs on the edges
 function update_qtrs (event) {
@@ -391,6 +378,17 @@ function new_placeholder() {
   placeholder.appendChild(empty_title);
 
   return placeholder
+}
+
+/* Hide the quarter "delete" buttons ([x]es) for non-empty and non-edge terms,
+   and add event listeners for initial [x]es */
+for (var i = 1; i < qtr_nodes.length - 1; ++i) {
+    qtr_nodes[i].children[0].children[1].addEventListener('click', update_qtrs);
+}
+// ensure first & last qtrs are deleteable, as long as there is > 1 qtr
+if (qtr_nodes.length > 3) {
+    qtr_nodes[1].children[0].children[1].hidden = false;
+    qtr_nodes[qtr_nodes.length - 2].children[0].children[1].hidden = false;
 }
 
 /* Set initial indices of courses in crs_idx object
