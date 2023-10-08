@@ -349,6 +349,7 @@ function update_qtrs (event) {
       const elec_container = document.getElementById('elec-container');
 
       // Iterate over all courses in container
+      let creds = 0
       while (course_container.children.length > 0) {
           let crs = course_container.children[0];
           // move to required/elective container as appropriate
@@ -361,7 +362,13 @@ function update_qtrs (event) {
           let crs_id = crs.getAttribute('data-id');
           changes.courses[crs_id] = {year: null, qtr: null};
           crs_idx[crs_id] = -1;
+          
+          // update credit counter
+          creds += Number(crs.getAttribute('data-credits'));
       }
+      // modify total credit count
+      update_credits(-creds);
+
       // Add placeholder element
       let placeholder = new_placeholder();
       course_container.append(placeholder);
