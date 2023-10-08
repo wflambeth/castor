@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 ENV = os.environ.get('ENV', 'PROD')
 if ENV == 'DEV':
-    load_dotenv()
+    load_dotenv('.env.dev')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -180,7 +180,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': os.environ.get('LOGGING_URL', '/app/castor/castor.log'),
+            'filename': os.environ.get('LOGGING_URL', 'castor/castor.log'),
             'formatter': 'verbose'
         },
         'console': {
